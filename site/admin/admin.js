@@ -2,7 +2,6 @@ const ownerEl = document.getElementById("owner");
 const repoEl = document.getElementById("repo");
 const branchEl = document.getElementById("branch");
 const tokenEl = document.getElementById("token");
-const publicTokenEl = document.getElementById("publicToken");
 const loadFilesBtnEl = document.getElementById("loadFilesBtn");
 const checkRunsBtnEl = document.getElementById("checkRunsBtn");
 const incomingSelectEl = document.getElementById("incomingSelect");
@@ -402,7 +401,6 @@ async function uploadAndTrigger() {
 
 async function deleteIncomingByDocId() {
   const { owner, repo, branch, token } = mustGetConfig();
-  const publicToken = String(publicTokenEl?.value || "").trim() || token;
   const selectedFile = String(incomingSelectEl.value || "").trim();
   const inputDocId = normalizeDocId(deleteDocIdEl?.value);
   const selectedDocId = normalizeDocId(docIdEl.value || incomingSelectEl.value);
@@ -548,7 +546,7 @@ async function deleteIncomingByDocId() {
       owner: publicOwner,
       repo: PUBLIC_SITE_REPO,
       branch: PUBLIC_SITE_BRANCH,
-      token: publicToken,
+      token,
       path: publicPayloadPath,
       message: `chore: delete payload (${normalizedDocId}) via admin page`,
     });
@@ -560,7 +558,7 @@ async function deleteIncomingByDocId() {
         owner: publicOwner,
         repo: PUBLIC_SITE_REPO,
         branch: PUBLIC_SITE_BRANCH,
-        token: publicToken,
+        token,
         path: "site/payload.json",
         message: "chore: delete legacy payload.json via admin page",
       });
@@ -573,7 +571,7 @@ async function deleteIncomingByDocId() {
       owner: publicOwner,
       repo: PUBLIC_SITE_REPO,
       branch: PUBLIC_SITE_BRANCH,
-      token: publicToken,
+      token,
       path: publicManifestPath,
     });
     if (manifestFile.exists && manifestFile.text) {
@@ -597,7 +595,7 @@ async function deleteIncomingByDocId() {
             owner: publicOwner,
             repo: PUBLIC_SITE_REPO,
             branch: PUBLIC_SITE_BRANCH,
-            token: publicToken,
+            token,
             path: publicManifestPath,
             message: `chore: remove doc from manifest (${normalizedDocId}) via admin page`,
             text: nextText,
