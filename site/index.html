@@ -3,71 +3,351 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Secure Report</title>
+    <title>安全报告访问页</title>
     <style>
       :root {
-        color-scheme: light dark;
+        color-scheme: light;
+        --bg: #f2f5fb;
+        --surface: #ffffff;
+        --surface-soft: #f8fbff;
+        --line: #d7deea;
+        --line-strong: #bcc7d8;
+        --text: #0f172a;
+        --muted: #64748b;
+        --primary: #0e7490;
+        --primary-press: #0b5f75;
+        --accent: #4f46e5;
+        --secondary: #eef3f9;
+        --ok: #0f766e;
+        --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+        --shadow-md: 0 12px 28px rgba(15, 23, 42, 0.08);
       }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
-        font-family: Arial, sans-serif;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background:
+          radial-gradient(1250px 420px at 0% -20%, #ffffff 0%, transparent 58%),
+          radial-gradient(900px 420px at 100% -20%, #e9f0ff 0%, transparent 56%),
+          var(--bg);
+        color: var(--text);
       }
+
       .wrap {
-        max-width: 680px;
-        margin: 48px auto;
-        padding: 0 16px;
+        max-width: 1240px;
+        margin: 24px auto;
+        padding: 0 18px 26px;
       }
-      .panel {
-        border: 1px solid #8884;
+
+      .header {
+        margin-bottom: 14px;
+        padding: 16px 18px;
+        border: 1px solid var(--line);
         border-radius: 8px;
-        padding: 16px;
+        background: linear-gradient(125deg, #ffffff, #f6faff 66%, #f1f6ff);
+        box-shadow: var(--shadow-sm);
       }
-      .row {
+
+      .header h1 {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.18;
+      }
+
+      .header p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+        gap: 14px;
+        align-items: start;
+      }
+
+      .block {
+        background: linear-gradient(180deg, var(--surface), var(--surface-soft));
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .viewer-panel {
+        overflow: hidden;
+      }
+
+      .viewer-toolbar {
         display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        background: linear-gradient(180deg, #ffffff, #f9fbff);
+      }
+
+      .title {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .meta {
+        display: flex;
+        align-items: center;
         gap: 8px;
+        flex-wrap: wrap;
       }
-      .row + .row {
-        margin-top: 10px;
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 28px;
+        border: 1px solid #d3dcef;
+        border-radius: 6px;
+        background: #f8faff;
+        color: #334155;
+        padding: 0 10px;
+        font-size: 12px;
       }
-      input[type="password"],
-      select {
-        flex: 1;
-        padding: 10px 12px;
+
+      code {
+        border: 1px solid #d8e0ef;
+        border-radius: 4px;
+        background: #f5f8fe;
+        padding: 2px 7px;
+        color: #1e293b;
       }
-      button {
-        padding: 10px 16px;
-        cursor: pointer;
+
+      .viewer-shell {
+        min-height: 74vh;
+        background: #ffffff;
       }
-      #status {
-        margin-top: 10px;
-        min-height: 22px;
+
+      .viewer-empty {
+        min-height: 74vh;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 22px;
+        color: var(--muted);
       }
+
+      .viewer-empty-card {
+        width: min(460px, 100%);
+        border: 1px solid #d6deee;
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, #fbfdff, #f5f9ff),
+          repeating-linear-gradient(
+            0deg,
+            transparent 0,
+            transparent 10px,
+            rgba(148, 163, 184, 0.08) 10px,
+            rgba(148, 163, 184, 0.08) 11px
+          );
+        padding: 20px;
+        box-shadow: var(--shadow-md);
+      }
+
+      .viewer-empty-card strong {
+        display: block;
+        color: #0f172a;
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+
       #viewer {
         width: 100%;
-        height: calc(100vh - 220px);
+        min-height: 74vh;
         border: 0;
-        margin-top: 16px;
         display: none;
+      }
+
+      .control {
+        padding: 14px;
+      }
+
+      .control + .control {
+        border-top: 1px solid var(--line);
+      }
+
+      .label {
+        margin: 0 0 7px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .key-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+      }
+
+      input[type="password"],
+      select {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--text);
+        padding: 8px 12px;
+        font-size: 14px;
+        transition: border-color 120ms ease, box-shadow 120ms ease;
+      }
+
+      input:hover,
+      select:hover {
+        border-color: var(--line-strong);
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #0891b2;
+        box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.17);
+      }
+
+      button {
+        min-height: 42px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background: var(--secondary);
+        color: var(--text);
+        padding: 8px 14px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .btn-primary {
+        border-color: var(--primary);
+        background: linear-gradient(180deg, #1789a7, var(--primary));
+        color: #fff;
+      }
+
+      .btn-primary:active {
+        background: var(--primary-press);
+        border-color: var(--primary-press);
+      }
+
+      #docState {
+        display: inline-flex;
+        align-items: center;
+        min-height: 42px;
+        padding: 0 10px;
+        border-radius: 6px;
+        border: 1px solid #cfd8e9;
+        background: linear-gradient(180deg, #fbfdff, #f5f8ff);
+        color: #334155;
+        font-size: 13px;
+      }
+
+      #status {
+        min-height: 132px;
+        border: 1px solid #dbe3ef;
+        border-radius: 6px;
+        background: linear-gradient(180deg, #fcfdff, #f7faff);
+        padding: 10px 12px;
+        white-space: pre-wrap;
+        font-size: 14px;
+      }
+
+      .status-title {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #334155;
+      }
+
+      @media (max-width: 1000px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .grid-2,
+        .key-row {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
     <main class="wrap">
-      <section class="panel" id="unlockPanel">
-        <h2>输入访问 KEY</h2>
-        <p>Doc ID: <code id="docId">default</code></p>
-        <div class="row">
-          <select id="docSelect" aria-label="选择文档"></select>
-          <button id="useDocBtn" type="button">选择文档</button>
-        </div>
-        <div class="row">
-          <input id="keyInput" type="password" placeholder="请输入 KEY" />
-          <button id="unlockBtn" type="button">解锁</button>
-        </div>
-        <div id="status"></div>
+      <header class="header">
+        <h1>安全报告访问</h1>
+        <p>打开页面默认进入文档工作区，选择 Doc ID 并输入 KEY 即可解锁查看。</p>
+      </header>
+
+      <section class="layout">
+        <section class="block viewer-panel">
+          <div class="viewer-toolbar">
+            <p class="title">文档查看区</p>
+            <div class="meta">
+              <span class="chip">Doc ID: <code id="docId">default</code></span>
+              <span class="chip">访问方式: KEY</span>
+            </div>
+          </div>
+          <div class="viewer-shell">
+            <div id="viewerEmpty" class="viewer-empty">
+              <div class="viewer-empty-card">
+                <strong>文档已加密</strong>
+                请在右侧输入对应 KEY 进行访问。
+              </div>
+            </div>
+            <iframe id="viewer" sandbox="allow-same-origin allow-scripts"></iframe>
+          </div>
+        </section>
+
+        <section class="block" id="unlockPanel">
+          <div class="control">
+            <p class="title">KEY 访问</p>
+          </div>
+
+          <div class="control">
+            <div class="grid-2">
+              <div>
+                <p class="label">选择文档</p>
+                <select id="docSelect" aria-label="选择文档"></select>
+              </div>
+              <div>
+                <p class="label">文档状态</p>
+                <div id="docState">待解锁</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="control">
+            <div class="key-row">
+              <input id="keyInput" type="password" placeholder="请输入访问 KEY" />
+              <button id="unlockBtn" class="btn-primary" type="button">解锁访问</button>
+            </div>
+          </div>
+
+          <div class="control">
+            <p class="status-title">状态信息</p>
+            <div id="status"></div>
+          </div>
+        </section>
       </section>
-      <iframe id="viewer" sandbox="allow-same-origin allow-scripts"></iframe>
     </main>
-    <script type="module" src="./decrypt.js"></script>
+    <script type="module" src="./decrypt.js?v=20260805-view-3"></script>
   </body>
 </html>

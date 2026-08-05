@@ -1,10 +1,11 @@
 const statusEl = document.getElementById("status");
 const keyInputEl = document.getElementById("keyInput");
 const unlockBtnEl = document.getElementById("unlockBtn");
-const unlockPanelEl = document.getElementById("unlockPanel");
 const docIdEl = document.getElementById("docId");
 const docSelectEl = document.getElementById("docSelect");
-const useDocBtnEl = document.getElementById("useDocBtn");
+const docStateEl = document.getElementById("docState");
+const viewerEl = document.getElementById("viewer");
+const viewerEmptyEl = document.getElementById("viewerEmpty");
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -39,6 +40,33 @@ function b64ToBytes(b64) {
 function setStatus(msg, isError = false) {
   statusEl.textContent = msg;
   statusEl.style.color = isError ? "#d33" : "";
+}
+
+function setDocState(msg) {
+  if (docStateEl) docStateEl.textContent = msg;
+}
+
+function lockViewer(message) {
+  if (activeBlobUrl) {
+    URL.revokeObjectURL(activeBlobUrl);
+    activeBlobUrl = null;
+  }
+  if (viewerEl) {
+    viewerEl.style.display = "none";
+    viewerEl.removeAttribute("src");
+  }
+  if (viewerEmptyEl) {
+    viewerEmptyEl.style.display = "grid";
+    viewerEmptyEl.innerHTML = `<div><strong>文档已加密</strong><br />${message}</div>`;
+  }
+}
+
+function openViewer(blobUrl) {
+  if (viewerEmptyEl) viewerEmptyEl.style.display = "none";
+  if (viewerEl) {
+    viewerEl.style.display = "block";
+    viewerEl.src = blobUrl;
+  }
 }
 
 function toHex(bytes) {
@@ -122,12 +150,13 @@ async function loadPayload() {
 async function tryUnlock() {
   const secret = keyInputEl.value;
   if (!secret) {
-    setStatus("Please input KEY first.", true);
+    setStatus("请先输入 KEY。", true);
     return;
   }
 
   unlockBtnEl.disabled = true;
-  setStatus(`Decrypting doc: ${docId} ...`);
+  setDocState("解锁中");
+  setStatus(`正在解密文档：${docId} ...`);
 
   try {
     const payload = await loadPayload();
@@ -174,10 +203,14 @@ async function tryUnlock() {
       type: payload.mimeType || "text/html",
     });
     activeBlobUrl = URL.createObjectURL(blob);
-    setStatus(`Unlocked: ${docId}, opening...`);
-    window.location.assign(activeBlobUrl);
+    openViewer(activeBlobUrl);
+    setDocState("已解锁");
+    setStatus(`已解锁：${docId}`);
+    unlockBtnEl.disabled = false;
   } catch (_err) {
-    setStatus(`KEY invalid or doc unavailable: ${docId}`, true);
+    lockViewer("请在右侧输入正确 KEY 解锁。");
+    setDocState("解锁失败");
+    setStatus(`KEY 无效或文档不可用：${docId}`, true);
     await new Promise((resolve) => setTimeout(resolve, 1200));
     unlockBtnEl.disabled = false;
     keyInputEl.focus();
@@ -187,7 +220,9 @@ async function tryUnlock() {
 function applySelectedDoc() {
   const selected = sanitizeDocId(docSelectEl?.value || docId);
   setDocId(selected);
-  setStatus(`Selected doc: ${selected}`);
+  lockViewer(`当前文档：${selected}<br />请输入对应 KEY。`);
+  setDocState("待解锁");
+  setStatus(`已切换文档：${selected}`);
   keyInputEl.focus();
 }
 
@@ -195,9 +230,11 @@ unlockBtnEl.addEventListener("click", tryUnlock);
 keyInputEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter") tryUnlock();
 });
-if (useDocBtnEl) useDocBtnEl.addEventListener("click", applySelectedDoc);
 if (docSelectEl) {
   docSelectEl.addEventListener("change", applySelectedDoc);
 }
 
 initDocSelector();
+lockViewer(`当前文档：${docId}<br />请在右侧输入 KEY 访问。`);
+setDocState("待解锁");
+setStatus("页面已就绪，请输入 KEY。");
