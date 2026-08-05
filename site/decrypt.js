@@ -6,6 +6,8 @@ const docSelectEl = document.getElementById("docSelect");
 const docStateEl = document.getElementById("docState");
 const viewerEl = document.getElementById("viewer");
 const viewerEmptyEl = document.getElementById("viewerEmpty");
+const viewerPanelEl = document.getElementById("viewerPanel");
+const fullscreenBtnEl = document.getElementById("fullscreenBtn");
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -66,6 +68,32 @@ function openViewer(blobUrl) {
   if (viewerEl) {
     viewerEl.style.display = "block";
     viewerEl.src = blobUrl;
+  }
+}
+
+function isViewerFullscreen() {
+  return document.fullscreenElement === viewerPanelEl;
+}
+
+function setFullscreenButtonLabel() {
+  if (!fullscreenBtnEl) return;
+  fullscreenBtnEl.textContent = isViewerFullscreen() ? "退出全屏" : "全屏展开";
+}
+
+async function toggleViewerFullscreen() {
+  if (!viewerPanelEl) return;
+  try {
+    if (isViewerFullscreen()) {
+      await document.exitFullscreen();
+    } else if (viewerPanelEl.requestFullscreen) {
+      await viewerPanelEl.requestFullscreen();
+    } else {
+      setStatus("当前浏览器不支持全屏功能。", true);
+      return;
+    }
+    setFullscreenButtonLabel();
+  } catch (_err) {
+    setStatus("全屏切换失败，请重试。", true);
   }
 }
 
@@ -233,8 +261,13 @@ keyInputEl.addEventListener("keydown", (e) => {
 if (docSelectEl) {
   docSelectEl.addEventListener("change", applySelectedDoc);
 }
+if (fullscreenBtnEl) {
+  fullscreenBtnEl.addEventListener("click", toggleViewerFullscreen);
+}
+document.addEventListener("fullscreenchange", setFullscreenButtonLabel);
 
 initDocSelector();
 lockViewer(`当前文档：${docId}<br />请在右侧输入 KEY 访问。`);
 setDocState("待解锁");
 setStatus("页面已就绪，请输入 KEY。");
+setFullscreenButtonLabel();

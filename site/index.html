@@ -118,6 +118,12 @@
         font-size: 12px;
       }
 
+      .toolbar-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
       code {
         border: 1px solid #d8e0ef;
         border-radius: 4px;
@@ -246,6 +252,14 @@
         border-color: var(--primary-press);
       }
 
+      .btn-ghost {
+        min-height: 30px;
+        padding: 0 10px;
+        font-size: 12px;
+        border-color: #d3dcec;
+        background: linear-gradient(180deg, #ffffff, #f3f7ff);
+      }
+
       #docState {
         display: inline-flex;
         align-items: center;
@@ -275,6 +289,22 @@
         color: #334155;
       }
 
+      .viewer-panel:fullscreen {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        border: 0;
+      }
+
+      .viewer-panel:fullscreen .viewer-shell {
+        min-height: calc(100vh - 56px);
+      }
+
+      .viewer-panel:fullscreen #viewer,
+      .viewer-panel:fullscreen .viewer-empty {
+        min-height: calc(100vh - 56px);
+      }
+
       @media (max-width: 1000px) {
         .layout {
           grid-template-columns: 1fr;
@@ -297,12 +327,15 @@
       </header>
 
       <section class="layout">
-        <section class="block viewer-panel">
+        <section class="block viewer-panel" id="viewerPanel">
           <div class="viewer-toolbar">
             <p class="title">文档查看区</p>
-            <div class="meta">
-              <span class="chip">Doc ID: <code id="docId">default</code></span>
-              <span class="chip">访问方式: KEY</span>
+            <div class="toolbar-actions">
+              <div class="meta">
+                <span class="chip">Doc ID: <code id="docId">default</code></span>
+                <span class="chip">访问方式: KEY</span>
+              </div>
+              <button id="fullscreenBtn" class="btn-ghost" type="button">全屏展开</button>
             </div>
           </div>
           <div class="viewer-shell">
