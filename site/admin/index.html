@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Report Admin</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      .wrap {
+        max-width: 760px;
+        margin: 48px auto;
+        padding: 0 16px;
+      }
+      .panel {
+        border: 1px solid #8884;
+        border-radius: 8px;
+        padding: 16px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .row + .row {
+        margin-top: 10px;
+      }
+      input[type="text"],
+      input[type="password"],
+      input[type="file"],
+      select {
+        flex: 1;
+        min-width: 180px;
+        padding: 10px 12px;
+      }
+      button {
+        padding: 10px 16px;
+        cursor: pointer;
+      }
+      #status {
+        margin-top: 14px;
+        min-height: 52px;
+        white-space: pre-wrap;
+      }
+      .hint {
+        margin-top: 10px;
+        font-size: 13px;
+        opacity: 0.82;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="panel" id="adminPanel">
+        <h2>Admin Upload Portal</h2>
+        <p>目标：<code id="repoLabel">JJCODEWH/HTML-SECURE-REPORT-ADMIN@main</code></p>
+
+        <div class="row">
+          <input id="owner" type="text" value="JJCODEWH" placeholder="Owner" />
+          <input id="repo" type="text" value="HTML-SECURE-REPORT-ADMIN" placeholder="Private Repo" />
+          <input id="branch" type="text" value="main" placeholder="Branch" />
+        </div>
+
+        <div class="row">
+          <input id="token" type="password" autocomplete="off" placeholder="管理员 PAT (repo 权限)" />
+          <button id="loadFilesBtn" type="button">加载已有文件</button>
+          <button id="checkRunsBtn" type="button">查看流程状态</button>
+        </div>
+
+        <div class="row">
+          <select id="incomingSelect" aria-label="已有 incoming 文件">
+            <option value="">incoming/ 现有文件（可选）</option>
+          </select>
+          <input id="docId" type="text" placeholder="Doc ID（默认取文件名）" />
+        </div>
+
+        <div class="row">
+          <input id="htmlFile" type="file" accept=".html,text/html" />
+          <button id="uploadBtn" type="button">上传并触发加密</button>
+        </div>
+
+        <div class="hint">
+          上传路径：<code>incoming/&lt;doc-id&gt;.html</code>，提交后自动触发私有仓库加密流程并同步公开 payload。
+        </div>
+        <div id="status"></div>
+      </section>
+    </main>
+    <script type="module" src="./admin.js"></script>
+  </body>
+</html>
