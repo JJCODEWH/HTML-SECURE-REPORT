@@ -3,9 +3,15 @@ const keyInputEl = document.getElementById("keyInput");
 const unlockBtnEl = document.getElementById("unlockBtn");
 const viewerEl = document.getElementById("viewer");
 const unlockPanelEl = document.getElementById("unlockPanel");
+const docIdEl = document.getElementById("docId");
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
+const url = new URL(window.location.href);
+const rawDocId = url.searchParams.get("doc") || "default";
+const docId = /^[a-zA-Z0-9_-]+$/.test(rawDocId) ? rawDocId : "default";
+
+if (docIdEl) docIdEl.textContent = docId;
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -37,7 +43,12 @@ async function deriveAesKey(secret, saltBytes, iterations) {
 }
 
 async function loadPayload() {
-  const res = await fetch("./payload.json", { cache: "no-store" });
+  const payloadPath = `./payloads/${docId}.json`;
+  let res = await fetch(payloadPath, { cache: "no-store" });
+  if (!res.ok && docId === "default") {
+    // Backward compatibility for legacy single-file mode.
+    res = await fetch("./payload.json", { cache: "no-store" });
+  }
   if (!res.ok) throw new Error(`payload load failed: ${res.status}`);
   return res.json();
 }
@@ -45,12 +56,12 @@ async function loadPayload() {
 async function tryUnlock() {
   const secret = keyInputEl.value;
   if (!secret) {
-    setStatus("请先输入 KEY。", true);
+    setStatus("Please input KEY first.", true);
     return;
   }
 
   unlockBtnEl.disabled = true;
-  setStatus("正在解密...");
+  setStatus(`Decrypting doc: ${docId} ...`);
 
   try {
     const payload = await loadPayload();
@@ -71,9 +82,9 @@ async function tryUnlock() {
     viewerEl.srcdoc = textDecoder.decode(plaintextBuffer);
     viewerEl.style.display = "block";
     unlockPanelEl.style.display = "none";
-    setStatus("解锁成功。");
+    setStatus(`Unlocked: ${docId}`);
   } catch (err) {
-    setStatus("KEY 错误或内容不可用。", true);
+    setStatus(`KEY invalid or doc unavailable: ${docId}`, true);
     await new Promise((resolve) => setTimeout(resolve, 1200));
     unlockBtnEl.disabled = false;
     keyInputEl.focus();

@@ -1,32 +1,44 @@
 # HTML-SECURE-REPORT
 
-静态加密发布方案：仓库和 GitHub Pages 只保存密文，访问者输入 KEY 后在浏览器端解密并查看报告。
+Single private repository model:
 
-## 目录
+- `site/` is public deployment output (GitHub Pages publishes only this folder).
+- `admin/` stores administrator-only mapping files (`doc_id -> key`).
+- `private/` stores source html files used for encryption.
 
-- `site/`: 公开部署目录（可直接用于 GitHub Pages）
-- `tools/`: 本地加密脚本
-- `private/`: 本地明文目录（不会提交）
+## Access model
 
-## 使用步骤
+1. Visitor opens: `https://jjcodewh.github.io/HTML-SECURE-REPORT/?doc=<doc_id>`
+2. Frontend loads `site/payloads/<doc_id>.json`
+3. Visitor inputs KEY
+4. Browser decrypts html and renders it
 
-1. 把 `private/report.template.html` 复制为 `private/report.html` 并替换内容。
-2. 在本目录执行：
+## Add or update one html document
 
 ```bash
-node tools/encrypt-report.mjs private/report.html site/payload.json
+node tools/add-doc.mjs <doc-id> <input-html>
 ```
 
-3. 按提示输入 KEY（至少 16 位，建议 20+）。
-4. 提交并推送 `site/` 目录，发布到 GitHub Pages。
+Example:
 
-## GitHub Pages
+```bash
+node tools/add-doc.mjs finance-2026 private/report.template.html
+```
 
-仓库已提供工作流：`.github/workflows/secure-report-pages.yml`，会自动发布 `HTML-SECURE-REPORT/site`。
-首次使用需要在仓库 `Settings -> Pages` 里把 Source 设为 `GitHub Actions`。
+This command will:
 
-## 安全边界
+- generate `site/payloads/<doc-id>.json`
+- upsert `admin/key-map.csv`
 
-- 这是“前端解密”，不是服务端鉴权。
-- 未知 KEY 的访问者无法直接拿到明文内容。
-- KEY 泄露后，内容会被读取；请定期轮换 KEY 并重新加密。
+## Deploy
+
+Workflow file: `.github/workflows/secure-report-pages.yml`
+
+- Pages source should be `GitHub Actions`
+- Only `site/**` changes trigger deployment
+
+## Security notes
+
+- Keep repository private if `admin/key-map.csv` contains real keys.
+- Do not expose raw keys in public channels.
+- Rotate keys and regenerate payloads if a key leaks.
