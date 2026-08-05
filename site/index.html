@@ -26,7 +26,11 @@
         display: flex;
         gap: 8px;
       }
-      input[type="password"] {
+      .row + .row {
+        margin-top: 10px;
+      }
+      input[type="password"],
+      select {
         flex: 1;
         padding: 10px 12px;
       }
@@ -52,6 +56,10 @@
       <section class="panel" id="unlockPanel">
         <h2>输入访问 KEY</h2>
         <p>Doc ID: <code id="docId">default</code></p>
+        <div class="row">
+          <select id="docSelect" aria-label="选择文档"></select>
+          <button id="useDocBtn" type="button">选择文档</button>
+        </div>
         <div class="row">
           <input id="keyInput" type="password" placeholder="请输入 KEY" />
           <button id="unlockBtn" type="button">解锁</button>

@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-08-05T09:58:01.289Z",
+  "count": 3,
+  "docs": [
+    {
+      "doc_id": "alt-2026",
+      "input_file": "private/report-alt.html",
+      "updated_at": "2026-08-05T08:56:53.670Z"
+    },
+    {
+      "doc_id": "itel_nigeria_ops_dashboard_previous_version_v5",
+      "input_file": "incoming/itel_nigeria_ops_dashboard_previous_version_v5.html",
+      "updated_at": "2026-08-05T09:58:00.038Z"
+    },
+    {
+      "doc_id": "web-upload-test",
+      "input_file": "incoming/web-upload-test.html",
+      "updated_at": "2026-08-05T09:58:01.245Z"
+    }
+  ]
+}

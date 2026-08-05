@@ -3,16 +3,31 @@ const keyInputEl = document.getElementById("keyInput");
 const unlockBtnEl = document.getElementById("unlockBtn");
 const unlockPanelEl = document.getElementById("unlockPanel");
 const docIdEl = document.getElementById("docId");
+const docSelectEl = document.getElementById("docSelect");
+const useDocBtnEl = document.getElementById("useDocBtn");
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 const url = new URL(window.location.href);
-const rawDocId = url.searchParams.get("doc") || "default";
-const docId = /^[a-zA-Z0-9_-]+$/.test(rawDocId) ? rawDocId : "default";
-let activeBlobUrl = null;
 const forceDesktop = url.searchParams.get("desktop") !== "0";
+let activeBlobUrl = null;
 
-if (docIdEl) docIdEl.textContent = docId;
+function sanitizeDocId(raw) {
+  return /^[a-zA-Z0-9_-]+$/.test(raw || "") ? raw : "default";
+}
+
+let docId = sanitizeDocId(url.searchParams.get("doc") || "default");
+
+function setDocId(nextDocId) {
+  docId = sanitizeDocId(nextDocId);
+  if (docIdEl) docIdEl.textContent = docId;
+  if (docSelectEl) docSelectEl.value = docId;
+  const nextUrl = new URL(window.location.href);
+  nextUrl.searchParams.set("doc", docId);
+  window.history.replaceState({}, "", nextUrl.toString());
+}
+
+setDocId(docId);
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -62,6 +77,35 @@ async function deriveAesKey(secret, saltBytes, iterations) {
     false,
     ["decrypt"]
   );
+}
+
+async function loadManifest() {
+  const res = await fetch("./payloads/_manifest.json", { cache: "no-store" });
+  if (!res.ok) return [];
+  const data = await res.json();
+  if (!Array.isArray(data?.docs)) return [];
+  return data.docs
+    .map((x) => sanitizeDocId(x?.doc_id))
+    .filter(Boolean);
+}
+
+async function initDocSelector() {
+  let docIds = [];
+  try {
+    docIds = await loadManifest();
+  } catch (_err) {
+    docIds = [];
+  }
+  if (!docIds.includes(docId)) {
+    docIds.unshift(docId);
+  }
+  const uniqueDocIds = [...new Set(docIds)];
+  if (docSelectEl) {
+    docSelectEl.innerHTML = uniqueDocIds
+      .map((x) => `<option value="${x}">${x}</option>`)
+      .join("");
+    docSelectEl.value = docId;
+  }
 }
 
 async function loadPayload() {
@@ -116,7 +160,10 @@ async function tryUnlock() {
     }
 
     let renderBytes = plaintextBytes;
-    if (forceDesktop && (payload.mimeType || "text/html").includes("text/html")) {
+    if (
+      forceDesktop &&
+      (payload.mimeType || "text/html").includes("text/html")
+    ) {
       const html = textDecoder.decode(plaintextBytes);
       const patchedHtml = injectDesktopOverride(html);
       renderBytes = textEncoder.encode(patchedHtml);
@@ -129,7 +176,7 @@ async function tryUnlock() {
     activeBlobUrl = URL.createObjectURL(blob);
     setStatus(`Unlocked: ${docId}, opening...`);
     window.location.assign(activeBlobUrl);
-  } catch (err) {
+  } catch (_err) {
     setStatus(`KEY invalid or doc unavailable: ${docId}`, true);
     await new Promise((resolve) => setTimeout(resolve, 1200));
     unlockBtnEl.disabled = false;
@@ -137,7 +184,20 @@ async function tryUnlock() {
   }
 }
 
+function applySelectedDoc() {
+  const selected = sanitizeDocId(docSelectEl?.value || docId);
+  setDocId(selected);
+  setStatus(`Selected doc: ${selected}`);
+  keyInputEl.focus();
+}
+
 unlockBtnEl.addEventListener("click", tryUnlock);
 keyInputEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter") tryUnlock();
 });
+if (useDocBtnEl) useDocBtnEl.addEventListener("click", applySelectedDoc);
+if (docSelectEl) {
+  docSelectEl.addEventListener("change", applySelectedDoc);
+}
+
+initDocSelector();
