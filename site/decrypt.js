@@ -72,7 +72,11 @@ function openViewer(blobUrl) {
 }
 
 function isViewerFullscreen() {
-  return document.fullscreenElement === viewerPanelEl;
+  const fullscreenElement =
+    document.fullscreenElement ||
+    document.webkitFullscreenElement ||
+    document.msFullscreenElement;
+  return fullscreenElement === viewerPanelEl;
 }
 
 function setFullscreenButtonLabel() {
@@ -84,9 +88,22 @@ async function toggleViewerFullscreen() {
   if (!viewerPanelEl) return;
   try {
     if (isViewerFullscreen()) {
-      await document.exitFullscreen();
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      } else {
+        setStatus("当前浏览器不支持退出全屏。", true);
+        return;
+      }
     } else if (viewerPanelEl.requestFullscreen) {
       await viewerPanelEl.requestFullscreen();
+    } else if (viewerPanelEl.webkitRequestFullscreen) {
+      viewerPanelEl.webkitRequestFullscreen();
+    } else if (viewerPanelEl.msRequestFullscreen) {
+      viewerPanelEl.msRequestFullscreen();
     } else {
       setStatus("当前浏览器不支持全屏功能。", true);
       return;
@@ -265,6 +282,8 @@ if (fullscreenBtnEl) {
   fullscreenBtnEl.addEventListener("click", toggleViewerFullscreen);
 }
 document.addEventListener("fullscreenchange", setFullscreenButtonLabel);
+document.addEventListener("webkitfullscreenchange", setFullscreenButtonLabel);
+document.addEventListener("MSFullscreenChange", setFullscreenButtonLabel);
 
 initDocSelector();
 lockViewer(`当前文档：${docId}<br />请在右侧输入 KEY 访问。`);

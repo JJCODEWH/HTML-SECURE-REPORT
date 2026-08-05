@@ -305,6 +305,19 @@
         min-height: calc(100vh - 56px);
       }
 
+      .viewer-panel:-webkit-full-screen {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        border: 0;
+      }
+
+      .viewer-panel:-webkit-full-screen .viewer-shell,
+      .viewer-panel:-webkit-full-screen #viewer,
+      .viewer-panel:-webkit-full-screen .viewer-empty {
+        min-height: calc(100vh - 56px);
+      }
+
       @media (max-width: 1000px) {
         .layout {
           grid-template-columns: 1fr;
@@ -381,6 +394,6 @@
         </section>
       </section>
     </main>
-    <script type="module" src="./decrypt.js?v=20260805-view-3"></script>
+    <script type="module" src="./decrypt.js?v=20260805-view-4"></script>
   </body>
 </html>
