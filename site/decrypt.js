@@ -1,7 +1,6 @@
 const statusEl = document.getElementById("status");
 const keyInputEl = document.getElementById("keyInput");
 const unlockBtnEl = document.getElementById("unlockBtn");
-const viewerEl = document.getElementById("viewer");
 const unlockPanelEl = document.getElementById("unlockPanel");
 const docIdEl = document.getElementById("docId");
 
@@ -102,10 +101,8 @@ async function tryUnlock() {
       type: payload.mimeType || "text/html",
     });
     activeBlobUrl = URL.createObjectURL(blob);
-    viewerEl.src = activeBlobUrl;
-    viewerEl.style.display = "block";
-    unlockPanelEl.style.display = "none";
-    setStatus(`Unlocked: ${docId}`);
+    setStatus(`Unlocked: ${docId}, opening...`);
+    window.location.assign(activeBlobUrl);
   } catch (err) {
     setStatus(`KEY invalid or doc unavailable: ${docId}`, true);
     await new Promise((resolve) => setTimeout(resolve, 1200));
