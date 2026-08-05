@@ -43,6 +43,12 @@
         background: linear-gradient(135deg, #ffffff, #f7fafe);
         box-shadow: var(--shadow-sm);
       }
+      .header-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
       .header h1 {
         margin: 0;
         font-size: 30px;
@@ -155,6 +161,20 @@
         background: var(--primary-press);
         border-color: var(--primary-press);
       }
+      .btn-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, #ffffff, #f5f8ff);
+        color: var(--text);
+        padding: 0 12px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+      }
       .repo {
         margin: 0;
         font-size: 13px;
@@ -202,13 +222,20 @@
         .cols-key {
           grid-template-columns: 1fr;
         }
+        .header-top {
+          flex-direction: column;
+          align-items: flex-start;
+        }
       }
     </style>
   </head>
   <body>
     <main class="wrap">
       <header class="header">
-        <h1>管理员上传与密钥查询</h1>
+        <div class="header-top">
+          <h1>管理员上传与密钥查询</h1>
+          <a class="btn-link" href="../?v=20260805-view6">返回查看界面</a>
+        </div>
         <p>统一处理 HTML 上传、密钥查询、流程状态检查。</p>
       </header>
 
