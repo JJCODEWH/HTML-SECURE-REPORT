@@ -145,9 +145,7 @@ function parseKeyMapCsv(csvText) {
   });
 }
 
-async function listIncomingFiles() {
-  const { owner, repo, branch, token } = mustGetConfig();
-  setStatus("正在加载 incoming 文件...");
+async function fetchIncomingHtmlFiles({ owner, repo, branch, token }) {
   const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/incoming?ref=${encodeURIComponent(branch)}`;
   const { res, data } = await requestJson(url, "GET", token);
   if (!res.ok || !Array.isArray(data)) {
@@ -155,10 +153,18 @@ async function listIncomingFiles() {
     throw new Error(`加载 incoming 失败：${message}`);
   }
 
-  const files = data
+  return data
     .filter((item) => item && item.type === "file" && /\.html?$/i.test(item.name))
     .map((item) => item.name)
     .sort((a, b) => a.localeCompare(b));
+}
+
+async function listIncomingFiles(options = {}) {
+  const { owner, repo, branch, token } = mustGetConfig();
+  const silent = Boolean(options.silent);
+  if (!silent) setStatus("正在加载 incoming 文件...");
+
+  const files = await fetchIncomingHtmlFiles({ owner, repo, branch, token });
 
   incomingSelectEl.innerHTML = '<option value="">incoming/ 现有文件（可选）</option>';
   files.forEach((name) => {
@@ -168,7 +174,7 @@ async function listIncomingFiles() {
     incomingSelectEl.appendChild(opt);
   });
 
-  setStatus(`已加载 ${files.length} 个 HTML 文件。`);
+  if (!silent) setStatus(`已加载 ${files.length} 个 HTML 文件。`);
 }
 
 async function checkLatestRuns() {
@@ -328,18 +334,41 @@ async function uploadAndTrigger() {
 
 async function deleteIncomingByDocId() {
   const { owner, repo, branch, token } = mustGetConfig();
+  const selectedFile = String(incomingSelectEl.value || "").trim();
   const inputDocId = normalizeDocId(deleteDocIdEl?.value);
   const selectedDocId = normalizeDocId(docIdEl.value || incomingSelectEl.value);
   const docId = inputDocId || selectedDocId;
-  if (!docId) {
-    throw new Error("请先输入要删除的 Doc ID。");
+  if (!selectedFile && !docId) {
+    throw new Error("请先输入要删除的 Doc ID，或先选择 existing incoming 文件。");
   }
 
-  const path = `incoming/${docId}.html`;
   deleteBtnEl.disabled = true;
-  setStatus(`正在删除 ${path} ...`);
+  setStatus("正在匹配要删除的文件...");
 
   try {
+    const files = await fetchIncomingHtmlFiles({ owner, repo, branch, token });
+    let targetFile = "";
+
+    if (selectedFile && files.includes(selectedFile)) {
+      targetFile = selectedFile;
+    } else if (docId) {
+      targetFile =
+        files.find((name) => normalizeDocId(name) === docId) || "";
+    }
+
+    if (!targetFile && docId) {
+      const candidates = [`${docId}.html`, `${docId}.htm`];
+      targetFile = files.find((name) => candidates.includes(name)) || "";
+    }
+
+    if (!targetFile) {
+      throw new Error(
+        `未匹配到可删除文件。请先点击“加载 incoming”，再从下拉框选中文件后删除。`
+      );
+    }
+
+    const path = `incoming/${targetFile}`;
+    setStatus(`正在删除 ${path} ...`);
     const sha = await getFileSha({ owner, repo, branch, token, path });
     if (!sha) {
       throw new Error(`文件不存在：${path}`);
@@ -361,7 +390,7 @@ async function deleteIncomingByDocId() {
     const actionsUrl = `https://github.com/${owner}/${repo}/actions`;
     setStatus(
       `删除成功。\n` +
-        `doc: ${docId}\n` +
+        `doc: ${docId || normalizeDocId(targetFile)}\n` +
         `deleted: ${path}\n` +
         (commitUrl ? `commit: ${commitUrl}\n` : "") +
         `actions: ${actionsUrl}`
@@ -378,7 +407,7 @@ async function deleteIncomingByDocId() {
     }
 
     try {
-      await listIncomingFiles();
+      await listIncomingFiles({ silent: true });
     } catch (_err) {
       // Keep success status even if reload list fails.
     }
