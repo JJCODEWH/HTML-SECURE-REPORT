@@ -158,7 +158,8 @@ async function deriveAesKey(secret, saltBytes, iterations) {
 }
 
 async function loadManifest() {
-  const res = await fetch("./payloads/_manifest.json", { cache: "no-store" });
+  const manifestUrl = `./payloads/_manifest.json?t=${Date.now()}`;
+  const res = await fetch(manifestUrl, { cache: "no-store" });
   if (!res.ok) return [];
   const data = await res.json();
   if (!Array.isArray(data?.docs)) return [];
@@ -187,11 +188,11 @@ async function initDocSelector() {
 }
 
 async function loadPayload() {
-  const payloadPath = `./payloads/${docId}.json`;
+  const payloadPath = `./payloads/${docId}.json?t=${Date.now()}`;
   let res = await fetch(payloadPath, { cache: "no-store" });
   if (!res.ok && docId === "default") {
     // Backward compatibility for legacy single-file mode.
-    res = await fetch("./payload.json", { cache: "no-store" });
+    res = await fetch(`./payload.json?t=${Date.now()}`, { cache: "no-store" });
   }
   if (!res.ok) throw new Error(`payload load failed: ${res.status}`);
   return res.json();

@@ -17,6 +17,8 @@ const repoLabelEl = document.getElementById("repoLabel");
 const PUBLIC_SITE_OWNER = "JJCODEWH";
 const PUBLIC_SITE_REPO = "HTML-SECURE-REPORT";
 const PUBLIC_SITE_BRANCH = "main";
+const READY_POLL_INTERVAL_MS = 4000;
+const READY_POLL_TIMEOUT_MS = 120000;
 
 function setStatus(text, isError = false) {
   statusEl.textContent = text;
@@ -146,6 +148,131 @@ function parseKeyMapCsv(csvText) {
       key: cols[keyIdx] || "",
     };
   });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function getDocKeyFromKeyMap({ owner, repo, branch, token, docId }) {
+  const keyMapFile = await getRepoTextFile({
+    owner,
+    repo,
+    branch,
+    token,
+    path: "admin/key-map.csv",
+  });
+  if (!keyMapFile.exists || !keyMapFile.text) return "";
+  const rows = parseKeyMapCsv(keyMapFile.text);
+  const hit = rows.find((x) => normalizeDocId(x.doc_id) === docId);
+  return hit && hit.key ? hit.key : "";
+}
+
+async function isDocInPublicManifest({ docId, token }) {
+  const manifestFile = await getRepoTextFile({
+    owner: PUBLIC_SITE_OWNER,
+    repo: PUBLIC_SITE_REPO,
+    branch: PUBLIC_SITE_BRANCH,
+    token,
+    path: "site/payloads/_manifest.json",
+  });
+  if (!manifestFile.exists || !manifestFile.text) return false;
+  try {
+    const obj = JSON.parse(manifestFile.text);
+    if (!Array.isArray(obj?.docs)) return false;
+    return obj.docs.some((item) => normalizeDocId(item?.doc_id) === docId);
+  } catch (_err) {
+    return false;
+  }
+}
+
+async function waitForDocReady({ owner, repo, branch, token, docId }) {
+  const started = Date.now();
+  while (Date.now() - started < READY_POLL_TIMEOUT_MS) {
+    const elapsed = Math.floor((Date.now() - started) / 1000);
+    setStatus(`已上传，等待自动加密与发布（${elapsed}s）...\nDoc: ${docId}`);
+
+    let key = "";
+    let payloadReady = false;
+    let inManifest = false;
+
+    try {
+      key = await getDocKeyFromKeyMap({ owner, repo, branch, token, docId });
+    } catch (_err) {
+      key = "";
+    }
+    try {
+      const payloadSha = await getFileSha({
+        owner: PUBLIC_SITE_OWNER,
+        repo: PUBLIC_SITE_REPO,
+        branch: PUBLIC_SITE_BRANCH,
+        token,
+        path: `site/payloads/${docId}.json`,
+      });
+      payloadReady = Boolean(payloadSha);
+    } catch (_err) {
+      payloadReady = false;
+    }
+    try {
+      inManifest = await isDocInPublicManifest({ docId, token });
+    } catch (_err) {
+      inManifest = false;
+    }
+
+    if (key && payloadReady && inManifest) {
+      return { ready: true, key };
+    }
+    await sleep(READY_POLL_INTERVAL_MS);
+  }
+  return { ready: false, key: "" };
+}
+
+function getUploadTargetDocId() {
+  const file = htmlFileEl.files && htmlFileEl.files[0];
+  const fallbackDocId = normalizeDocId(file ? file.name : "");
+  const inputDocId = normalizeDocId(docIdEl.value);
+  const selectedDocId = normalizeDocId(incomingSelectEl.value);
+  return inputDocId || selectedDocId || fallbackDocId;
+}
+
+async function waitForDocRemoved({ owner, repo, branch, token, docId }) {
+  const started = Date.now();
+  while (Date.now() - started < READY_POLL_TIMEOUT_MS) {
+    const elapsed = Math.floor((Date.now() - started) / 1000);
+    setStatus(`已提交删除，等待仓库状态同步（${elapsed}s）...\nDoc: ${docId}`);
+
+    let payloadSha = "x";
+    let inManifest = true;
+    let key = "x";
+
+    try {
+      payloadSha = await getFileSha({
+        owner: PUBLIC_SITE_OWNER,
+        repo: PUBLIC_SITE_REPO,
+        branch: PUBLIC_SITE_BRANCH,
+        token,
+        path: `site/payloads/${docId}.json`,
+      });
+    } catch (_err) {
+      payloadSha = "x";
+    }
+    try {
+      inManifest = await isDocInPublicManifest({ docId, token });
+    } catch (_err) {
+      inManifest = true;
+    }
+    try {
+      key = await getDocKeyFromKeyMap({ owner, repo, branch, token, docId });
+    } catch (_err) {
+      key = "x";
+    }
+
+    if (!payloadSha && !inManifest && !key) {
+      return { removed: true };
+    }
+    await sleep(READY_POLL_INTERVAL_MS);
+  }
+  return { removed: false };
 }
 
 async function fetchIncomingHtmlFiles({ owner, repo, branch, token }) {
@@ -385,7 +512,7 @@ async function uploadAndTrigger() {
 
     const commitUrl = data?.commit?.html_url || "";
     const actionsUrl = `https://github.com/${owner}/${repo}/actions`;
-    const publicUrl = `https://jjcodewh.github.io/HTML-SECURE-REPORT/?doc=${encodeURIComponent(docId)}`;
+    const publicUrl = `https://jjcodewh.github.io/HTML-SECURE-REPORT/?doc=${encodeURIComponent(docId)}&desktop=1`;
     setStatus(
       `上传成功，已触发自动流程。\n` +
         `doc: ${docId}\n` +
@@ -699,7 +826,32 @@ viewKeyBtnEl.addEventListener("click", async () => {
 
 uploadBtnEl.addEventListener("click", async () => {
   try {
+    const { owner, repo, branch, token } = mustGetConfig();
+    const docId = getUploadTargetDocId();
     await uploadAndTrigger();
+    if (docId) {
+      const actionsUrl = `https://github.com/${owner}/${repo}/actions`;
+      const publicUrl = `https://jjcodewh.github.io/HTML-SECURE-REPORT/?doc=${encodeURIComponent(docId)}&desktop=1`;
+      const ready = await waitForDocReady({ owner, repo, branch, token, docId });
+      if (ready.ready) {
+        keyOutputEl.value = ready.key;
+        setStatus(
+          `上传并发布完成。\n` +
+            `doc: ${docId}\n` +
+            `key: 已生成并可查询\n` +
+            `actions: ${actionsUrl}\n` +
+            `public: ${publicUrl}`
+        );
+      } else {
+        setStatus(
+          `上传已提交，流程仍在进行中。\n` +
+            `doc: ${docId}\n` +
+            `actions: ${actionsUrl}\n` +
+            `public: ${publicUrl}\n` +
+            `提示：稍后可点“查看流程状态”。`
+        );
+      }
+    }
   } catch (error) {
     setStatus(error.message, true);
   }
@@ -707,7 +859,17 @@ uploadBtnEl.addEventListener("click", async () => {
 
 deleteBtnEl.addEventListener("click", async () => {
   try {
+    const { owner, repo, branch, token } = mustGetConfig();
+    const docId = normalizeDocId(deleteDocIdEl?.value || docIdEl?.value || incomingSelectEl?.value);
     await deleteIncomingByDocId();
+    if (docId) {
+      const removed = await waitForDocRemoved({ owner, repo, branch, token, docId });
+      if (removed.removed) {
+        setStatus(`${statusEl.textContent}\n同步检查: 已确认删除完成`);
+      } else {
+        setStatus(`${statusEl.textContent}\n同步检查: 仓库删除已完成，页面缓存可能延迟 1-2 分钟`);
+      }
+    }
   } catch (error) {
     setStatus(error.message, true);
   }
