@@ -5,10 +5,12 @@ const unlockPanelEl = document.getElementById("unlockPanel");
 const docIdEl = document.getElementById("docId");
 
 const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
 const url = new URL(window.location.href);
 const rawDocId = url.searchParams.get("doc") || "default";
 const docId = /^[a-zA-Z0-9_-]+$/.test(rawDocId) ? rawDocId : "default";
 let activeBlobUrl = null;
+const forceDesktop = url.searchParams.get("desktop") !== "0";
 
 if (docIdEl) docIdEl.textContent = docId;
 
@@ -26,6 +28,23 @@ function setStatus(msg, isError = false) {
 
 function toHex(bytes) {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function injectDesktopOverride(htmlText) {
+  const override = `
+<style id="secure-report-desktop-override">
+html, body { min-width: 1280px !important; }
+@media (max-width: 1120px) {
+  .nav { display: flex !important; }
+  .top { height: 78px !important; padding: 0 28px !important; flex-wrap: nowrap !important; }
+  .brand { min-width: 280px !important; }
+  .kpis { grid-template-columns: repeat(6, 1fr) !important; }
+}
+</style>`;
+  if (htmlText.includes("</head>")) {
+    return htmlText.replace("</head>", `${override}\n</head>`);
+  }
+  return `${override}\n${htmlText}`;
 }
 
 async function deriveAesKey(secret, saltBytes, iterations) {
@@ -96,8 +115,15 @@ async function tryUnlock() {
       }
     }
 
+    let renderBytes = plaintextBytes;
+    if (forceDesktop && (payload.mimeType || "text/html").includes("text/html")) {
+      const html = textDecoder.decode(plaintextBytes);
+      const patchedHtml = injectDesktopOverride(html);
+      renderBytes = textEncoder.encode(patchedHtml);
+    }
+
     if (activeBlobUrl) URL.revokeObjectURL(activeBlobUrl);
-    const blob = new Blob([plaintextBytes], {
+    const blob = new Blob([renderBytes], {
       type: payload.mimeType || "text/html",
     });
     activeBlobUrl = URL.createObjectURL(blob);
