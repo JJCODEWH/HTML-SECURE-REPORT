@@ -267,7 +267,6 @@ async function viewKeyByDocId() {
 
     keyOutputEl.value = hit.key;
     setStatus(`已读取 KEY：${selectedDocId}`);
-    alert(`Doc ID: ${selectedDocId}\nKEY: ${hit.key}`);
   } finally {
     viewKeyBtnEl.disabled = false;
     viewKeyBtnEl.textContent = prevBtnText || "按 Doc ID 查 KEY";
@@ -365,7 +364,6 @@ viewKeyBtnEl.addEventListener("click", async () => {
   } catch (error) {
     keyOutputEl.value = "";
     setStatus(error.message, true);
-    alert(`查询失败：${error.message}`);
   }
 });
 
