@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "kdf": "PBKDF2-SHA256",
+  "iterations": 600000,
+  "salt": "fX4khuD1LJJ3SnUkAa/ufQ==",
+  "iv": "xlZ1JclkLewO/2gu",
+  "ciphertext": "FAJVXwEzHmYc8ofmcHBWS+uS5aWseoownaz/tjCshlw+kiPs0in5bpe042fRKeeuQvNJ5oLEXUzPYUsYm5icZVg+HcmfpWSGUNMTF/DOsL1zTNtGhS5cmcX6CXf+/dPLnCygqNcmrcEYRn+oy/bipxFkie4CF0XdTxTDuzZcYfsWtMj5ZjzhEQhoeRF7+QSe9ECwfI4J4T76oY+XBL4ppxV/Yo4U/TfhWoaDxXBBFai0bxAluqI3nr3XrW6lNIdm+PU45Ooiig42c7x1qImeY6GUkC/EinqozlvsbmUm7Cmm6fZ9kFO1na/WCNonwdqN73fNSF55jNZ9izAh2M1DC6yMu1dwFHJy3uatvuQyGSldVN69GJEGcb7PJtQca2jMry71ciiT6sElEH0ev0crzKotnYd9T9nTdDvH3mHu90HLoMat",
+  "createdAt": "2026-08-05T09:19:23.047Z"
+}
