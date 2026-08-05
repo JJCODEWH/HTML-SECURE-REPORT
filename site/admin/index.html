@@ -261,6 +261,14 @@
             <input id="token" type="password" autocomplete="off" placeholder="管理员 PAT（repo 权限）" />
             <button id="loadFilesBtn" type="button">加载 incoming</button>
           </div>
+          <div class="row">
+            <input
+              id="publicToken"
+              type="password"
+              autocomplete="off"
+              placeholder="公开仓库 PAT（可选，不填则沿用上面的 PAT）"
+            />
+          </div>
         </section>
 
         <section class="block">
@@ -312,6 +320,6 @@
         </section>
       </section>
     </main>
-    <script src="./admin.js?v=20260805-5"></script>
+    <script src="./admin.js?v=20260805-6"></script>
   </body>
 </html>

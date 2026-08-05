@@ -2,6 +2,7 @@ const ownerEl = document.getElementById("owner");
 const repoEl = document.getElementById("repo");
 const branchEl = document.getElementById("branch");
 const tokenEl = document.getElementById("token");
+const publicTokenEl = document.getElementById("publicToken");
 const loadFilesBtnEl = document.getElementById("loadFilesBtn");
 const checkRunsBtnEl = document.getElementById("checkRunsBtn");
 const incomingSelectEl = document.getElementById("incomingSelect");
@@ -291,6 +292,11 @@ async function deleteRepoFileIfExists({
   const { res, data } = await requestJson(url, "DELETE", token, body);
   if (!res.ok) {
     const detail = data && data.message ? data.message : `HTTP ${res.status}`;
+    if (res.status === 403 && /Resource not accessible/i.test(detail)) {
+      throw new Error(
+        `删除 ${repo}/${path} 失败：公开仓库 PAT 权限不足。请使用可访问 ${PUBLIC_SITE_OWNER}/${PUBLIC_SITE_REPO} 且具备 Contents: Read and write 的 token。`
+      );
+    }
     throw new Error(`删除 ${repo}/${path} 失败：${detail}`);
   }
   return { deleted: true };
@@ -396,6 +402,7 @@ async function uploadAndTrigger() {
 
 async function deleteIncomingByDocId() {
   const { owner, repo, branch, token } = mustGetConfig();
+  const publicToken = String(publicTokenEl?.value || "").trim() || token;
   const selectedFile = String(incomingSelectEl.value || "").trim();
   const inputDocId = normalizeDocId(deleteDocIdEl?.value);
   const selectedDocId = normalizeDocId(docIdEl.value || incomingSelectEl.value);
@@ -541,7 +548,7 @@ async function deleteIncomingByDocId() {
       owner: publicOwner,
       repo: PUBLIC_SITE_REPO,
       branch: PUBLIC_SITE_BRANCH,
-      token,
+      token: publicToken,
       path: publicPayloadPath,
       message: `chore: delete payload (${normalizedDocId}) via admin page`,
     });
@@ -553,7 +560,7 @@ async function deleteIncomingByDocId() {
         owner: publicOwner,
         repo: PUBLIC_SITE_REPO,
         branch: PUBLIC_SITE_BRANCH,
-        token,
+        token: publicToken,
         path: "site/payload.json",
         message: "chore: delete legacy payload.json via admin page",
       });
@@ -566,7 +573,7 @@ async function deleteIncomingByDocId() {
       owner: publicOwner,
       repo: PUBLIC_SITE_REPO,
       branch: PUBLIC_SITE_BRANCH,
-      token,
+      token: publicToken,
       path: publicManifestPath,
     });
     if (manifestFile.exists && manifestFile.text) {
@@ -590,7 +597,7 @@ async function deleteIncomingByDocId() {
             owner: publicOwner,
             repo: PUBLIC_SITE_REPO,
             branch: PUBLIC_SITE_BRANCH,
-            token,
+            token: publicToken,
             path: publicManifestPath,
             message: `chore: remove doc from manifest (${normalizedDocId}) via admin page`,
             text: nextText,
@@ -601,7 +608,9 @@ async function deleteIncomingByDocId() {
               updateManifestResp.data && updateManifestResp.data.message
                 ? updateManifestResp.data.message
                 : `HTTP ${updateManifestResp.res.status}`;
-            throw new Error(`更新公开 manifest 失败：${msg}`);
+            throw new Error(
+              `更新公开 manifest 失败：${msg}。请检查公开仓库 PAT 是否有 Contents: Read and write 权限。`
+            );
           }
           publicManifestUpdated = true;
         }
