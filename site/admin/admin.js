@@ -41,7 +41,7 @@ function mustGetConfig() {
   const branch = branchEl.value.trim();
   const token = tokenEl.value.trim();
   if (!owner || !repo || !branch || !token) {
-    throw new Error("Please fill owner/repository/branch/PAT first.");
+    throw new Error("请先填写 Owner / Repository / Branch / PAT。");
   }
   return { owner, repo, branch, token };
 }
@@ -49,12 +49,12 @@ function mustGetConfig() {
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Failed to read file."));
+    reader.onerror = () => reject(new Error("读取文件失败。"));
     reader.onload = () => {
       const result = String(reader.result || "");
       const idx = result.indexOf(",");
       if (idx < 0) {
-        reject(new Error("Failed to encode file."));
+        reject(new Error("文件编码失败。"));
         return;
       }
       resolve(result.slice(idx + 1));
@@ -132,12 +132,12 @@ function parseKeyMapCsv(csvText) {
 
 async function listIncomingFiles() {
   const { owner, repo, branch, token } = mustGetConfig();
-  setStatus("Loading incoming files...");
+  setStatus("正在加载 incoming 文件...");
   const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/incoming?ref=${encodeURIComponent(branch)}`;
   const { res, data } = await requestJson(url, "GET", token);
   if (!res.ok || !Array.isArray(data)) {
     const message = data && data.message ? data.message : `HTTP ${res.status}`;
-    throw new Error(`Load incoming failed: ${message}`);
+    throw new Error(`加载 incoming 失败：${message}`);
   }
 
   const files = data
@@ -145,7 +145,7 @@ async function listIncomingFiles() {
     .map((item) => item.name)
     .sort((a, b) => a.localeCompare(b));
 
-  incomingSelectEl.innerHTML = '<option value="">incoming/ existing files (optional)</option>';
+  incomingSelectEl.innerHTML = '<option value="">incoming/ 现有文件（可选）</option>';
   files.forEach((name) => {
     const opt = document.createElement("option");
     opt.value = name;
@@ -153,17 +153,17 @@ async function listIncomingFiles() {
     incomingSelectEl.appendChild(opt);
   });
 
-  setStatus(`Loaded ${files.length} HTML files.`);
+  setStatus(`已加载 ${files.length} 个 HTML 文件。`);
 }
 
 async function checkLatestRuns() {
   const { owner, repo, branch, token } = mustGetConfig();
-  setStatus("Checking workflow status...");
+  setStatus("正在查询流程状态...");
   const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/runs?branch=${encodeURIComponent(branch)}&per_page=5`;
   const { res, data } = await requestJson(url, "GET", token);
   if (!res.ok || !Array.isArray(data?.workflow_runs)) {
     const message = data && data.message ? data.message : `HTTP ${res.status}`;
-    throw new Error(`Read workflow failed: ${message}`);
+    throw new Error(`读取流程失败：${message}`);
   }
 
   const lines = data.workflow_runs.slice(0, 3).map((run, idx) => {
@@ -175,7 +175,7 @@ async function checkLatestRuns() {
   });
 
   if (lines.length === 0) {
-    setStatus("No workflow runs on current branch.");
+    setStatus("当前分支还没有 workflow 记录。");
     return;
   }
   setStatus(lines.join("\n"));
@@ -188,18 +188,28 @@ async function getExistingSha({ owner, repo, branch, token, docId }) {
   if (res.status === 404) return null;
   if (!res.ok || !data?.sha) {
     const message = data && data.message ? data.message : `HTTP ${res.status}`;
-    throw new Error(`Check existing file failed: ${message}`);
+    throw new Error(`检查已存在文件失败：${message}`);
   }
   return data.sha;
+}
+
+function decodeBase64ToText(base64Text) {
+  const clean = String(base64Text || "").replace(/\n/g, "");
+  const binary = atob(clean);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder("utf-8").decode(bytes);
 }
 
 async function viewKeyByDocId() {
   const { owner, repo, branch, token } = mustGetConfig();
   const selectedDocId = normalizeDocId(docIdEl.value || incomingSelectEl.value);
   if (!selectedDocId) {
-    throw new Error("Please input/select a Doc ID first.");
+    throw new Error("请先输入或选择 Doc ID。");
   }
-  setStatus(`Reading key-map for doc: ${selectedDocId} ...`);
+  setStatus(`正在读取 key-map（doc: ${selectedDocId}）...`);
   keyOutputEl.value = "";
 
   const keyMapPath = "admin/key-map.csv";
@@ -207,31 +217,34 @@ async function viewKeyByDocId() {
   const { res, data } = await requestJson(url, "GET", token);
   if (!res.ok || !data?.content) {
     const message = data && data.message ? data.message : `HTTP ${res.status}`;
-    throw new Error(`Read key-map failed: ${message}`);
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(`读取 key-map 失败：无权限（${message}）。请检查 PAT 是否有私有仓库 Contents: Read。`);
+    }
+    throw new Error(`读取 key-map 失败：${message}`);
   }
 
   let csvText = "";
   try {
-    csvText = atob(String(data.content).replace(/\n/g, ""));
+    csvText = decodeBase64ToText(data.content);
   } catch (_err) {
-    throw new Error("Decode key-map failed.");
+    throw new Error("解析 key-map 内容失败。");
   }
 
   const rows = parseKeyMapCsv(csvText);
   const hit = rows.find((x) => normalizeDocId(x.doc_id) === selectedDocId);
   if (!hit || !hit.key) {
-    throw new Error(`No key found for doc: ${selectedDocId}`);
+    throw new Error(`未找到对应 KEY：${selectedDocId}`);
   }
 
   keyOutputEl.value = hit.key;
-  setStatus(`Key loaded for doc: ${selectedDocId}`);
+  setStatus(`已读取 KEY：${selectedDocId}`);
 }
 
 async function uploadAndTrigger() {
   const { owner, repo, branch, token } = mustGetConfig();
   const file = htmlFileEl.files && htmlFileEl.files[0];
   if (!file) {
-    throw new Error("Please select one HTML file.");
+    throw new Error("请先选择 HTML 文件。");
   }
 
   const fallbackDocId = normalizeDocId(file.name);
@@ -239,11 +252,11 @@ async function uploadAndTrigger() {
   const selectedDocId = normalizeDocId(incomingSelectEl.value);
   const docId = inputDocId || selectedDocId || fallbackDocId;
   if (!docId) {
-    throw new Error("Invalid Doc ID.");
+    throw new Error("Doc ID 无效。");
   }
 
   uploadBtnEl.disabled = true;
-  setStatus(`Uploading incoming/${docId}.html ...`);
+  setStatus(`正在上传 incoming/${docId}.html ...`);
 
   try {
     const content = await fileToBase64(file);
@@ -260,14 +273,14 @@ async function uploadAndTrigger() {
     const { res, data } = await requestJson(url, "PUT", token, body);
     if (!res.ok) {
       const message = data && data.message ? data.message : `HTTP ${res.status}`;
-      throw new Error(`Upload failed: ${message}`);
+      throw new Error(`上传失败：${message}`);
     }
 
     const commitUrl = data?.commit?.html_url || "";
     const actionsUrl = `https://github.com/${owner}/${repo}/actions`;
     const publicUrl = `https://jjcodewh.github.io/HTML-SECURE-REPORT/?doc=${encodeURIComponent(docId)}`;
     setStatus(
-      `Upload success, workflow triggered.\n` +
+      `上传成功，已触发自动流程。\n` +
         `doc: ${docId}\n` +
         `incoming: incoming/${docId}.html\n` +
         (commitUrl ? `commit: ${commitUrl}\n` : "") +
@@ -326,6 +339,10 @@ uploadBtnEl.addEventListener("click", async () => {
   } catch (error) {
     setStatus(error.message, true);
   }
+});
+
+keyOutputEl.addEventListener("focus", () => {
+  keyOutputEl.select();
 });
 
 syncRepoLabel();
