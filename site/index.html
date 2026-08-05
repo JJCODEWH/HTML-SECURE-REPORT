@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Report</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      .wrap {
+        max-width: 680px;
+        margin: 48px auto;
+        padding: 0 16px;
+      }
+      .panel {
+        border: 1px solid #8884;
+        border-radius: 8px;
+        padding: 16px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+      }
+      input[type="password"] {
+        flex: 1;
+        padding: 10px 12px;
+      }
+      button {
+        padding: 10px 16px;
+        cursor: pointer;
+      }
+      #status {
+        margin-top: 10px;
+        min-height: 22px;
+      }
+      #viewer {
+        width: 100%;
+        height: calc(100vh - 220px);
+        border: 0;
+        margin-top: 16px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="panel" id="unlockPanel">
+        <h2>输入访问 KEY</h2>
+        <div class="row">
+          <input id="keyInput" type="password" placeholder="请输入 KEY" />
+          <button id="unlockBtn" type="button">解锁</button>
+        </div>
+        <div id="status"></div>
+      </section>
+      <iframe id="viewer" sandbox="allow-same-origin allow-scripts"></iframe>
+    </main>
+    <script type="module" src="./decrypt.js"></script>
+  </body>
+</html>
