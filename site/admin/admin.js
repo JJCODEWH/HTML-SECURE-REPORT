@@ -10,6 +10,8 @@ const viewKeyBtnEl = document.getElementById("viewKeyBtn");
 const keyOutputEl = document.getElementById("keyOutput");
 const htmlFileEl = document.getElementById("htmlFile");
 const uploadBtnEl = document.getElementById("uploadBtn");
+const deleteDocIdEl = document.getElementById("deleteDocId");
+const deleteBtnEl = document.getElementById("deleteBtn");
 const statusEl = document.getElementById("status");
 const repoLabelEl = document.getElementById("repoLabel");
 
@@ -194,14 +196,13 @@ async function checkLatestRuns() {
   setStatus(lines.join("\n"));
 }
 
-async function getExistingSha({ owner, repo, branch, token, docId }) {
-  const path = `incoming/${docId}.html`;
+async function getFileSha({ owner, repo, branch, token, path }) {
   const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}?ref=${encodeURIComponent(branch)}`;
   const { res, data } = await requestJson(url, "GET", token);
   if (res.status === 404) return null;
   if (!res.ok || !data?.sha) {
     const message = data && data.message ? data.message : `HTTP ${res.status}`;
-    throw new Error(`检查已存在文件失败：${message}`);
+    throw new Error(`读取文件信息失败：${message}`);
   }
   return data.sha;
 }
@@ -293,8 +294,8 @@ async function uploadAndTrigger() {
 
   try {
     const content = await fileToBase64(file);
-    const sha = await getExistingSha({ owner, repo, branch, token, docId });
     const path = `incoming/${docId}.html`;
+    const sha = await getFileSha({ owner, repo, branch, token, path });
     const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`;
     const body = {
       message: `chore: upload incoming html (${docId}) via public admin page`,
@@ -325,6 +326,67 @@ async function uploadAndTrigger() {
   }
 }
 
+async function deleteIncomingByDocId() {
+  const { owner, repo, branch, token } = mustGetConfig();
+  const inputDocId = normalizeDocId(deleteDocIdEl?.value);
+  const selectedDocId = normalizeDocId(docIdEl.value || incomingSelectEl.value);
+  const docId = inputDocId || selectedDocId;
+  if (!docId) {
+    throw new Error("请先输入要删除的 Doc ID。");
+  }
+
+  const path = `incoming/${docId}.html`;
+  deleteBtnEl.disabled = true;
+  setStatus(`正在删除 ${path} ...`);
+
+  try {
+    const sha = await getFileSha({ owner, repo, branch, token, path });
+    if (!sha) {
+      throw new Error(`文件不存在：${path}`);
+    }
+
+    const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`;
+    const body = {
+      message: `chore: delete incoming html (${docId}) via public admin page`,
+      sha,
+      branch,
+    };
+    const { res, data } = await requestJson(url, "DELETE", token, body);
+    if (!res.ok) {
+      const message = data && data.message ? data.message : `HTTP ${res.status}`;
+      throw new Error(`删除失败：${message}`);
+    }
+
+    const commitUrl = data?.commit?.html_url || "";
+    const actionsUrl = `https://github.com/${owner}/${repo}/actions`;
+    setStatus(
+      `删除成功。\n` +
+        `doc: ${docId}\n` +
+        `deleted: ${path}\n` +
+        (commitUrl ? `commit: ${commitUrl}\n` : "") +
+        `actions: ${actionsUrl}`
+    );
+
+    if (incomingSelectEl.value === `${docId}.html`) {
+      incomingSelectEl.value = "";
+    }
+    if (docIdEl.value && normalizeDocId(docIdEl.value) === docId) {
+      docIdEl.value = "";
+    }
+    if (deleteDocIdEl) {
+      deleteDocIdEl.value = "";
+    }
+
+    try {
+      await listIncomingFiles();
+    } catch (_err) {
+      // Keep success status even if reload list fails.
+    }
+  } finally {
+    deleteBtnEl.disabled = false;
+  }
+}
+
 [ownerEl, repoEl, branchEl].forEach((el) => {
   el.addEventListener("input", syncRepoLabel);
 });
@@ -337,7 +399,11 @@ htmlFileEl.addEventListener("change", () => {
 
 incomingSelectEl.addEventListener("change", () => {
   if (incomingSelectEl.value) {
-    docIdEl.value = normalizeDocId(incomingSelectEl.value);
+    const normalized = normalizeDocId(incomingSelectEl.value);
+    docIdEl.value = normalized;
+    if (deleteDocIdEl && !deleteDocIdEl.value.trim()) {
+      deleteDocIdEl.value = normalized;
+    }
   }
 });
 
@@ -370,6 +436,14 @@ viewKeyBtnEl.addEventListener("click", async () => {
 uploadBtnEl.addEventListener("click", async () => {
   try {
     await uploadAndTrigger();
+  } catch (error) {
+    setStatus(error.message, true);
+  }
+});
+
+deleteBtnEl.addEventListener("click", async () => {
+  try {
+    await deleteIncomingByDocId();
   } catch (error) {
     setStatus(error.message, true);
   }
