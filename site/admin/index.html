@@ -188,10 +188,9 @@
               <input id="branch" type="text" value="main" placeholder="分支名" />
             </div>
           </div>
-          <div class="row cols-mix">
+          <div class="row cols-2">
             <input id="token" type="password" autocomplete="off" placeholder="管理员 PAT（repo 权限）" />
             <button id="loadFilesBtn" type="button">加载 incoming</button>
-            <button id="checkRunsBtn" type="button">查看流程状态</button>
           </div>
         </section>
 
@@ -217,9 +216,10 @@
 
         <section class="block full">
           <p class="section-title">上传与加密</p>
-          <div class="row cols-2">
+          <div class="row cols-mix">
             <input id="htmlFile" type="file" accept=".html,text/html" />
             <button id="uploadBtn" class="btn-primary" type="button">上传并触发加密</button>
+            <button id="checkRunsBtn" type="button">查看流程状态</button>
           </div>
           <p class="hint">
             上传路径：<code>incoming/&lt;doc-id&gt;.html</code>。提交后会触发私有仓库自动加密，并同步公开 payload。
