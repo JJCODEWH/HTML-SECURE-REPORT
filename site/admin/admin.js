@@ -225,6 +225,8 @@ async function viewKeyByDocId() {
   setStatus(`正在读取 key-map（doc: ${selectedDocId}）...`);
   keyOutputEl.value = "";
   viewKeyBtnEl.disabled = true;
+  const prevBtnText = viewKeyBtnEl.textContent;
+  viewKeyBtnEl.textContent = "查询中...";
 
   try {
     const keyMapPath = "admin/key-map.csv";
@@ -268,6 +270,7 @@ async function viewKeyByDocId() {
     alert(`Doc ID: ${selectedDocId}\nKEY: ${hit.key}`);
   } finally {
     viewKeyBtnEl.disabled = false;
+    viewKeyBtnEl.textContent = prevBtnText || "按 Doc ID 查 KEY";
   }
 }
 
@@ -379,3 +382,4 @@ keyOutputEl.addEventListener("focus", () => {
 });
 
 syncRepoLabel();
+setStatus("页面已就绪，请输入 PAT 后操作。");
