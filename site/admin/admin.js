@@ -83,6 +83,19 @@ async function requestJson(url, method, token, body) {
   return { res, data };
 }
 
+async function requestText(url, method, token) {
+  const res = await fetch(url, {
+    method,
+    headers: {
+      Accept: "application/vnd.github.raw+json",
+      Authorization: `Bearer ${token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+  const text = await res.text();
+  return { res, text };
+}
+
 function parseCsvRow(line) {
   const cells = [];
   let cur = "";
@@ -211,33 +224,51 @@ async function viewKeyByDocId() {
   }
   setStatus(`正在读取 key-map（doc: ${selectedDocId}）...`);
   keyOutputEl.value = "";
+  viewKeyBtnEl.disabled = true;
 
-  const keyMapPath = "admin/key-map.csv";
-  const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${keyMapPath}?ref=${encodeURIComponent(branch)}`;
-  const { res, data } = await requestJson(url, "GET", token);
-  if (!res.ok || !data?.content) {
-    const message = data && data.message ? data.message : `HTTP ${res.status}`;
-    if (res.status === 401 || res.status === 403) {
-      throw new Error(`读取 key-map 失败：无权限（${message}）。请检查 PAT 是否有私有仓库 Contents: Read。`);
-    }
-    throw new Error(`读取 key-map 失败：${message}`);
-  }
-
-  let csvText = "";
   try {
-    csvText = decodeBase64ToText(data.content);
-  } catch (_err) {
-    throw new Error("解析 key-map 内容失败。");
-  }
+    const keyMapPath = "admin/key-map.csv";
+    const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${keyMapPath}?ref=${encodeURIComponent(branch)}`;
+    const { res, data } = await requestJson(url, "GET", token);
 
-  const rows = parseKeyMapCsv(csvText);
-  const hit = rows.find((x) => normalizeDocId(x.doc_id) === selectedDocId);
-  if (!hit || !hit.key) {
-    throw new Error(`未找到对应 KEY：${selectedDocId}`);
-  }
+    let csvText = "";
+    if (res.ok && data?.content) {
+      try {
+        csvText = decodeBase64ToText(data.content);
+      } catch (_err) {
+        csvText = "";
+      }
+    }
 
-  keyOutputEl.value = hit.key;
-  setStatus(`已读取 KEY：${selectedDocId}`);
+    // Fallback: request raw csv text directly.
+    if (!csvText) {
+      const rawUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${keyMapPath}?ref=${encodeURIComponent(branch)}`;
+      const rawResp = await requestText(rawUrl, "GET", token);
+      if (!rawResp.res.ok || !rawResp.text) {
+        const message =
+          (data && data.message) || rawResp.text || `HTTP ${res.status}`;
+        if (res.status === 401 || res.status === 403) {
+          throw new Error(
+            `读取 key-map 失败：无权限（${message}）。请检查 PAT 是否有私有仓库 Contents: Read。`
+          );
+        }
+        throw new Error(`读取 key-map 失败：${message}`);
+      }
+      csvText = rawResp.text;
+    }
+
+    const rows = parseKeyMapCsv(csvText);
+    const hit = rows.find((x) => normalizeDocId(x.doc_id) === selectedDocId);
+    if (!hit || !hit.key) {
+      throw new Error(`未找到对应 KEY：${selectedDocId}`);
+    }
+
+    keyOutputEl.value = hit.key;
+    setStatus(`已读取 KEY：${selectedDocId}`);
+    alert(`Doc ID: ${selectedDocId}\nKEY: ${hit.key}`);
+  } finally {
+    viewKeyBtnEl.disabled = false;
+  }
 }
 
 async function uploadAndTrigger() {
@@ -326,10 +357,12 @@ checkRunsBtnEl.addEventListener("click", async () => {
 
 viewKeyBtnEl.addEventListener("click", async () => {
   try {
+    setStatus("开始查询 KEY...");
     await viewKeyByDocId();
   } catch (error) {
     keyOutputEl.value = "";
     setStatus(error.message, true);
+    alert(`查询失败：${error.message}`);
   }
 });
 
