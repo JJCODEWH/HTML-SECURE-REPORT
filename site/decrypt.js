@@ -22,16 +22,16 @@ function sanitizeDocId(raw) {
 
 let docId = sanitizeDocId(url.searchParams.get("doc") || "default");
 
-function setDocId(nextDocId) {
+function setDocId(nextDocId, syncUrl = true) {
   docId = sanitizeDocId(nextDocId);
   if (docIdEl) docIdEl.textContent = docId;
-  if (docSelectEl) docSelectEl.value = docId;
+  if (!syncUrl) return;
   const nextUrl = new URL(window.location.href);
   nextUrl.searchParams.set("doc", docId);
   window.history.replaceState({}, "", nextUrl.toString());
 }
 
-setDocId(docId);
+setDocId(docId, false);
 
 function b64ToBytes(b64) {
   const bin = atob(b64);
@@ -180,7 +180,7 @@ async function initDocSelector() {
     uniqueDocIds.push("default");
   }
   if (!uniqueDocIds.includes(docId)) {
-    setDocId(uniqueDocIds[0]);
+    setDocId(uniqueDocIds[0], false);
   }
   if (docSelectEl) {
     docSelectEl.innerHTML = uniqueDocIds
@@ -273,7 +273,7 @@ async function tryUnlock() {
 
 function applySelectedDoc() {
   const selected = sanitizeDocId(docSelectEl?.value || docId);
-  setDocId(selected);
+  setDocId(selected, true);
   lockViewer(`当前文档：${selected}<br />请输入对应 KEY。`);
   setDocState("待解锁");
   setStatus(`已切换文档：${selected}`);
