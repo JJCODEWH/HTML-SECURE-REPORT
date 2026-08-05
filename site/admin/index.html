@@ -6,93 +6,230 @@
     <title>安全报告管理台</title>
     <style>
       :root {
-        color-scheme: light dark;
+        color-scheme: light;
+        --bg: #f4f6f8;
+        --surface: #ffffff;
+        --line: #d7dde4;
+        --text: #1f2933;
+        --muted: #667085;
+        --primary: #0f766e;
+        --primary-press: #0b5e57;
+        --secondary: #eef2f6;
       }
       body {
         margin: 0;
-        font-family: Arial, sans-serif;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
       }
       .wrap {
-        max-width: 760px;
-        margin: 48px auto;
-        padding: 0 16px;
+        max-width: 1120px;
+        margin: 24px auto;
+        padding: 0 20px 28px;
       }
-      .panel {
-        border: 1px solid #8884;
+      .header {
+        margin-bottom: 16px;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.2;
+      }
+      .header p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 14px;
+      }
+      .block {
+        background: var(--surface);
+        border: 1px solid var(--line);
         border-radius: 8px;
-        padding: 16px;
+        padding: 14px;
       }
       .row {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
+        display: grid;
+        gap: 10px;
       }
       .row + .row {
         margin-top: 10px;
+      }
+      .cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .cols-mix {
+        grid-template-columns: 1.6fr auto auto;
+      }
+      .cols-key {
+        grid-template-columns: auto 1fr;
+      }
+      .section-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0 0 10px;
+      }
+      .label {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 0 0 6px;
       }
       input[type="text"],
       input[type="password"],
       input[type="file"],
       select {
-        flex: 1;
-        min-width: 180px;
-        padding: 10px 12px;
+        width: 100%;
+        box-sizing: border-box;
+        min-height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        color: var(--text);
+        padding: 8px 12px;
+        font-size: 14px;
       }
       button {
-        padding: 10px 16px;
+        min-height: 40px;
+        border-radius: 6px;
+        border: 1px solid var(--line);
+        background: var(--secondary);
+        color: var(--text);
+        padding: 8px 14px;
+        font-size: 14px;
+        font-weight: 600;
         cursor: pointer;
       }
+      button:hover {
+        filter: brightness(0.98);
+      }
+      .btn-primary {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+      }
+      .btn-primary:active {
+        background: var(--primary-press);
+        border-color: var(--primary-press);
+      }
+      .repo {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      code {
+        background: #f2f5f7;
+        border: 1px solid #e6ebef;
+        border-radius: 4px;
+        padding: 1px 5px;
+      }
       #status {
-        margin-top: 14px;
-        min-height: 52px;
+        min-height: 88px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fafbfc;
+        padding: 10px 12px;
         white-space: pre-wrap;
+        font-size: 14px;
       }
       .hint {
-        margin-top: 10px;
+        margin: 0;
         font-size: 13px;
-        opacity: 0.82;
+        color: var(--muted);
+      }
+      .full {
+        grid-column: 1 / -1;
+      }
+      .status-block {
+        grid-column: 1 / -1;
+      }
+      @media (max-width: 960px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 760px) {
+        .cols-3,
+        .cols-2,
+        .cols-mix,
+        .cols-key {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
     <main class="wrap">
-      <section class="panel" id="adminPanel">
-        <h2>管理员上传与密钥查询</h2>
-        <p>目标仓库：<code id="repoLabel">JJCODEWH/HTML-SECURE-REPORT-ADMIN@main</code></p>
+      <header class="header">
+        <h1>管理员上传与密钥查询</h1>
+        <p>统一处理 HTML 上传、密钥查询、流程状态检查。</p>
+      </header>
 
-        <div class="row">
-          <input id="owner" type="text" value="JJCODEWH" placeholder="Owner（组织/用户）" />
-          <input id="repo" type="text" value="HTML-SECURE-REPORT-ADMIN" placeholder="私有仓库名" />
-          <input id="branch" type="text" value="main" placeholder="分支名" />
-        </div>
+      <section class="layout" id="adminPanel">
+        <section class="block">
+          <p class="section-title">仓库连接</p>
+          <p class="repo">目标仓库：<code id="repoLabel">JJCODEWH/HTML-SECURE-REPORT-ADMIN@main</code></p>
+          <div class="row cols-3">
+            <div>
+              <p class="label">Owner</p>
+              <input id="owner" type="text" value="JJCODEWH" placeholder="组织/用户" />
+            </div>
+            <div>
+              <p class="label">Repository</p>
+              <input id="repo" type="text" value="HTML-SECURE-REPORT-ADMIN" placeholder="私有仓库名" />
+            </div>
+            <div>
+              <p class="label">Branch</p>
+              <input id="branch" type="text" value="main" placeholder="分支名" />
+            </div>
+          </div>
+          <div class="row cols-mix">
+            <input id="token" type="password" autocomplete="off" placeholder="管理员 PAT（repo 权限）" />
+            <button id="loadFilesBtn" type="button">加载 incoming</button>
+            <button id="checkRunsBtn" type="button">查看流程状态</button>
+          </div>
+        </section>
 
-        <div class="row">
-          <input id="token" type="password" autocomplete="off" placeholder="管理员 PAT（repo 权限）" />
-          <button id="loadFilesBtn" type="button">加载 incoming</button>
-          <button id="checkRunsBtn" type="button">查看流程状态</button>
-        </div>
+        <section class="block">
+          <p class="section-title">文档与密钥</p>
+          <div class="row cols-2">
+            <div>
+              <p class="label">选择已有文档</p>
+              <select id="incomingSelect" aria-label="existing incoming files">
+                <option value="">incoming/ 现有文件（可选）</option>
+              </select>
+            </div>
+            <div>
+              <p class="label">Doc ID</p>
+              <input id="docId" type="text" placeholder="默认取文件名" />
+            </div>
+          </div>
+          <div class="row cols-key">
+            <button id="viewKeyBtn" type="button">按 Doc ID 查 KEY</button>
+            <input id="keyOutput" type="text" readonly placeholder="这里显示 KEY" />
+          </div>
+        </section>
 
-        <div class="row">
-          <select id="incomingSelect" aria-label="existing incoming files">
-            <option value="">incoming/ 现有文件（可选）</option>
-          </select>
-          <input id="docId" type="text" placeholder="Doc ID（默认取文件名）" />
-        </div>
+        <section class="block full">
+          <p class="section-title">上传与加密</p>
+          <div class="row cols-2">
+            <input id="htmlFile" type="file" accept=".html,text/html" />
+            <button id="uploadBtn" class="btn-primary" type="button">上传并触发加密</button>
+          </div>
+          <p class="hint">
+            上传路径：<code>incoming/&lt;doc-id&gt;.html</code>。提交后会触发私有仓库自动加密，并同步公开 payload。
+          </p>
+        </section>
 
-        <div class="row">
-          <button id="viewKeyBtn" type="button">按 Doc ID 查 KEY</button>
-          <input id="keyOutput" type="text" readonly placeholder="这里显示 KEY" />
-        </div>
-
-        <div class="row">
-          <input id="htmlFile" type="file" accept=".html,text/html" />
-          <button id="uploadBtn" type="button">上传并触发加密</button>
-        </div>
-
-        <div class="hint">
-          上传路径：<code>incoming/&lt;doc-id&gt;.html</code>。提交后会触发私有仓库自动加密，并同步公开 payload。
-        </div>
-        <div id="status"></div>
+        <section class="block status-block">
+          <p class="section-title">状态信息</p>
+          <div id="status"></div>
+        </section>
       </section>
     </main>
     <script src="./admin.js?v=20260805-2"></script>
