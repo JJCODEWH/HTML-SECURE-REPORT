@@ -175,10 +175,13 @@ async function initDocSelector() {
   } catch (_err) {
     docIds = [];
   }
-  if (!docIds.includes(docId)) {
-    docIds.unshift(docId);
-  }
   const uniqueDocIds = [...new Set(docIds)];
+  if (uniqueDocIds.length === 0) {
+    uniqueDocIds.push("default");
+  }
+  if (!uniqueDocIds.includes(docId)) {
+    setDocId(uniqueDocIds[0]);
+  }
   if (docSelectEl) {
     docSelectEl.innerHTML = uniqueDocIds
       .map((x) => `<option value="${x}">${x}</option>`)
