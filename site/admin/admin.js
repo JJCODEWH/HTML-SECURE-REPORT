@@ -14,6 +14,9 @@ const deleteDocIdEl = document.getElementById("deleteDocId");
 const deleteBtnEl = document.getElementById("deleteBtn");
 const statusEl = document.getElementById("status");
 const repoLabelEl = document.getElementById("repoLabel");
+const PUBLIC_SITE_OWNER = "JJCODEWH";
+const PUBLIC_SITE_REPO = "HTML-SECURE-REPORT";
+const PUBLIC_SITE_BRANCH = "main";
 
 function setStatus(text, isError = false) {
   statusEl.textContent = text;
@@ -272,6 +275,27 @@ async function upsertRepoTextFile({
   return requestJson(url, "PUT", token, body);
 }
 
+async function deleteRepoFileIfExists({
+  owner,
+  repo,
+  branch,
+  token,
+  path,
+  message,
+}) {
+  const sha = await getFileSha({ owner, repo, branch, token, path });
+  if (!sha) return { deleted: false };
+
+  const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`;
+  const body = { message, sha, branch };
+  const { res, data } = await requestJson(url, "DELETE", token, body);
+  if (!res.ok) {
+    const detail = data && data.message ? data.message : `HTTP ${res.status}`;
+    throw new Error(`删除 ${repo}/${path} 失败：${detail}`);
+  }
+  return { deleted: true };
+}
+
 async function viewKeyByDocId() {
   const { owner, repo, branch, token } = mustGetConfig();
   const selectedDocId = normalizeDocId(docIdEl.value || incomingSelectEl.value);
@@ -506,15 +530,98 @@ async function deleteIncomingByDocId() {
       keyFileDeleted = true;
     }
 
+    // Remove public payload artifacts in JJCODEWH/HTML-SECURE-REPORT.
+    let publicPayloadDeleted = false;
+    let publicManifestUpdated = false;
+    let publicLegacyPayloadDeleted = false;
+    const publicOwner = PUBLIC_SITE_OWNER;
+
+    const publicPayloadPath = `site/payloads/${normalizedDocId}.json`;
+    const payloadDeleteResp = await deleteRepoFileIfExists({
+      owner: publicOwner,
+      repo: PUBLIC_SITE_REPO,
+      branch: PUBLIC_SITE_BRANCH,
+      token,
+      path: publicPayloadPath,
+      message: `chore: delete payload (${normalizedDocId}) via admin page`,
+    });
+    publicPayloadDeleted = payloadDeleteResp.deleted;
+
+    // Legacy compatibility: delete site/payload.json when doc_id is default.
+    if (normalizedDocId === "default") {
+      const legacyResp = await deleteRepoFileIfExists({
+        owner: publicOwner,
+        repo: PUBLIC_SITE_REPO,
+        branch: PUBLIC_SITE_BRANCH,
+        token,
+        path: "site/payload.json",
+        message: "chore: delete legacy payload.json via admin page",
+      });
+      publicLegacyPayloadDeleted = legacyResp.deleted;
+    }
+
+    // Update site/payloads/_manifest.json docs list.
+    const publicManifestPath = "site/payloads/_manifest.json";
+    const manifestFile = await getRepoTextFile({
+      owner: publicOwner,
+      repo: PUBLIC_SITE_REPO,
+      branch: PUBLIC_SITE_BRANCH,
+      token,
+      path: publicManifestPath,
+    });
+    if (manifestFile.exists && manifestFile.text) {
+      let manifestObj = null;
+      try {
+        manifestObj = JSON.parse(manifestFile.text);
+      } catch (_err) {
+        manifestObj = null;
+      }
+      if (manifestObj && Array.isArray(manifestObj.docs)) {
+        const prevCount = manifestObj.docs.length;
+        manifestObj.docs = manifestObj.docs.filter(
+          (item) => normalizeDocId(item && item.doc_id) !== normalizedDocId
+        );
+        const nextCount = manifestObj.docs.length;
+        if (nextCount !== prevCount) {
+          manifestObj.count = nextCount;
+          manifestObj.generated_at = new Date().toISOString();
+          const nextText = `${JSON.stringify(manifestObj, null, 2)}\n`;
+          const updateManifestResp = await upsertRepoTextFile({
+            owner: publicOwner,
+            repo: PUBLIC_SITE_REPO,
+            branch: PUBLIC_SITE_BRANCH,
+            token,
+            path: publicManifestPath,
+            message: `chore: remove doc from manifest (${normalizedDocId}) via admin page`,
+            text: nextText,
+            sha: manifestFile.sha,
+          });
+          if (!updateManifestResp.res.ok) {
+            const msg =
+              updateManifestResp.data && updateManifestResp.data.message
+                ? updateManifestResp.data.message
+                : `HTTP ${updateManifestResp.res.status}`;
+            throw new Error(`更新公开 manifest 失败：${msg}`);
+          }
+          publicManifestUpdated = true;
+        }
+      }
+    }
+
     const actionsUrl = `https://github.com/${owner}/${repo}/actions`;
+    const publicRepoUrl = `https://github.com/${publicOwner}/${PUBLIC_SITE_REPO}`;
     setStatus(
       `删除成功。\n` +
         `doc: ${docId || normalizedDocId}\n` +
         `deleted: ${incomingPath}\n` +
         `key-map: ${keyMapUpdated ? "已移除对应记录" : "未找到对应记录"}\n` +
         `key-file: ${keyFileDeleted ? "已删除" : "未找到"}\n` +
+        `public-payload: ${publicPayloadDeleted ? "已删除" : "未找到"}\n` +
+        `public-manifest: ${publicManifestUpdated ? "已更新" : "未找到对应条目"}\n` +
+        `public-legacy-payload: ${publicLegacyPayloadDeleted ? "已删除" : "未处理"}\n` +
         (commitUrl ? `commit: ${commitUrl}\n` : "") +
-        `actions: ${actionsUrl}`
+        `actions: ${actionsUrl}\n` +
+        `public-repo: ${publicRepoUrl}`
     );
 
     if (incomingSelectEl.value === `${docId}.html`) {

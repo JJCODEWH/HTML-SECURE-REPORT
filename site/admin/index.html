@@ -302,7 +302,7 @@
             <button id="deleteBtn" type="button">删除 incoming 文件</button>
           </div>
           <p class="hint">
-            删除路径：<code>incoming/&lt;doc-id&gt;.html</code>。删除后会产生一次提交，并可在流程状态中查看。
+            删除会同时清理私有仓库（incoming / key-map / keys）与公开仓库（payload 与 manifest）对应内容。
           </p>
         </section>
 
@@ -312,6 +312,6 @@
         </section>
       </section>
     </main>
-    <script src="./admin.js?v=20260805-4"></script>
+    <script src="./admin.js?v=20260805-5"></script>
   </body>
 </html>
