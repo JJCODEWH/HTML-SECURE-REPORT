@@ -10,7 +10,7 @@ const url = new URL(window.location.href);
 const rawDocId = url.searchParams.get("doc") || "default";
 const docId = /^[a-zA-Z0-9_-]+$/.test(rawDocId) ? rawDocId : "default";
 let activeBlobUrl = null;
-const forceDesktop = url.searchParams.get("desktop") === "1";
+const forceDesktop = url.searchParams.get("desktop") !== "0";
 
 if (docIdEl) docIdEl.textContent = docId;
 
