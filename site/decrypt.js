@@ -16,6 +16,19 @@ const url = new URL(window.location.href);
 const forceDesktop = url.searchParams.get("desktop") !== "0";
 let activeBlobUrl = null;
 
+function browserCompat() {
+  const ua = navigator.userAgent || "";
+  const isIE = /MSIE|Trident\//i.test(ua);
+  const hasCrypto = Boolean(window.crypto && window.crypto.subtle);
+  const hasBlobUrl = Boolean(window.URL && URL.createObjectURL);
+  const hasFetch = typeof fetch === "function";
+  const hasPromise = typeof Promise === "function";
+  return {
+    ok: !isIE && hasCrypto && hasBlobUrl && hasFetch && hasPromise,
+    isIE,
+  };
+}
+
 function sanitizeDocId(raw) {
   return /^[a-zA-Z0-9_-]+$/.test(raw || "") ? raw : "default";
 }
@@ -280,25 +293,48 @@ function applySelectedDoc() {
   keyInputEl.focus();
 }
 
-unlockBtnEl.addEventListener("click", tryUnlock);
-keyInputEl.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") tryUnlock();
-});
-if (docSelectEl) {
-  docSelectEl.addEventListener("change", applySelectedDoc);
+function attachViewerHandlers() {
+  unlockBtnEl.addEventListener("click", tryUnlock);
+  keyInputEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") tryUnlock();
+  });
+  if (docSelectEl) {
+    docSelectEl.addEventListener("change", applySelectedDoc);
+  }
+  if (fullscreenBtnEl) {
+    fullscreenBtnEl.addEventListener("click", toggleViewerFullscreen);
+  }
+  if (adminJumpBtnEl) {
+    adminJumpBtnEl.addEventListener("click", jumpToAdmin);
+  }
+  document.addEventListener("fullscreenchange", setFullscreenButtonLabel);
+  document.addEventListener("webkitfullscreenchange", setFullscreenButtonLabel);
+  document.addEventListener("MSFullscreenChange", setFullscreenButtonLabel);
 }
-if (fullscreenBtnEl) {
-  fullscreenBtnEl.addEventListener("click", toggleViewerFullscreen);
-}
-if (adminJumpBtnEl) {
-  adminJumpBtnEl.addEventListener("click", jumpToAdmin);
-}
-document.addEventListener("fullscreenchange", setFullscreenButtonLabel);
-document.addEventListener("webkitfullscreenchange", setFullscreenButtonLabel);
-document.addEventListener("MSFullscreenChange", setFullscreenButtonLabel);
 
-initDocSelector();
+function disableViewerControls() {
+  if (unlockBtnEl) unlockBtnEl.disabled = true;
+  if (keyInputEl) keyInputEl.disabled = true;
+  if (docSelectEl) docSelectEl.disabled = true;
+  if (fullscreenBtnEl) fullscreenBtnEl.disabled = true;
+}
+
+const compat = browserCompat();
+if (!compat.ok) {
+  disableViewerControls();
+  setDocState("浏览器不兼容");
+  lockViewer("当前浏览器不支持解密能力，请使用 Chrome / Edge 最新版，或 Safari 15+。");
+  setStatus(
+    compat.isIE
+      ? "当前是 IE/IE 模式，无法访问。请改用 Chrome / Edge 或 Safari 15+。"
+      : "当前浏览器能力不足，无法访问。请改用 Chrome / Edge 最新版，或 Safari 15+。",
+    true
+  );
+} else {
+  attachViewerHandlers();
+  initDocSelector();
 lockViewer(`当前文档：${docId}<br />请在右侧输入 KEY 访问。`);
 setDocState("待解锁");
 setStatus("页面已就绪，请输入 KEY。");
 setFullscreenButtonLabel();
+}

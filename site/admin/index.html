@@ -312,6 +312,16 @@
         </section>
       </section>
     </main>
-    <script src="./admin.js?v=20260805-8"></script>
+    <script nomodule>
+      (function () {
+        var html = '' +
+          '<div style="max-width:760px;margin:40px auto;padding:18px;border:1px solid #d9dee8;border-radius:8px;font-family:Segoe UI,Arial,sans-serif;background:#fff;">' +
+          '<h2 style="margin:0 0 10px 0;">浏览器不兼容</h2>' +
+          '<p style="margin:0;color:#334155;line-height:1.6;">当前浏览器版本过低，无法打开管理界面。请使用最新版 Chrome / Edge，或 Safari 15 及以上版本。</p>' +
+          '</div>';
+        document.body.innerHTML = html;
+      })();
+    </script>
+    <script src="./admin.js?v=20260805-9"></script>
   </body>
 </html>

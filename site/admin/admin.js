@@ -20,6 +20,20 @@ const PUBLIC_SITE_BRANCH = "main";
 const READY_POLL_INTERVAL_MS = 4000;
 const READY_POLL_TIMEOUT_MS = 120000;
 
+function browserCompat() {
+  const ua = navigator.userAgent || "";
+  const isIE = /MSIE|Trident\//i.test(ua);
+  const hasFetch = typeof fetch === "function";
+  const hasPromise = typeof Promise === "function";
+  const hasFileReader = typeof FileReader !== "undefined";
+  const hasEncoder = typeof TextEncoder !== "undefined";
+  const hasDecoder = typeof TextDecoder !== "undefined";
+  return {
+    ok: !isIE && hasFetch && hasPromise && hasFileReader && hasEncoder && hasDecoder,
+    isIE,
+  };
+}
+
 function setStatus(text, isError = false) {
   statusEl.textContent = text;
   statusEl.style.color = isError ? "#d33" : "";
@@ -798,6 +812,7 @@ incomingSelectEl.addEventListener("change", () => {
   }
 });
 
+function bindAdminHandlers() {
 loadFilesBtnEl.addEventListener("click", async () => {
   try {
     await listIncomingFiles();
@@ -878,6 +893,34 @@ deleteBtnEl.addEventListener("click", async () => {
 keyOutputEl.addEventListener("focus", () => {
   keyOutputEl.select();
 });
+}
 
 syncRepoLabel();
-setStatus("页面已就绪，请输入 PAT 后操作。");
+const compat = browserCompat();
+if (!compat.ok) {
+  const disabledMsg = compat.isIE
+    ? "当前是 IE/IE 模式，管理页不支持。请改用 Chrome / Edge 或 Safari 15+。"
+    : "当前浏览器能力不足，管理页不支持。请改用 Chrome / Edge 最新版，或 Safari 15+。";
+  [
+    ownerEl,
+    repoEl,
+    branchEl,
+    tokenEl,
+    loadFilesBtnEl,
+    checkRunsBtnEl,
+    incomingSelectEl,
+    docIdEl,
+    viewKeyBtnEl,
+    htmlFileEl,
+    uploadBtnEl,
+    deleteDocIdEl,
+    deleteBtnEl,
+    keyOutputEl,
+  ].forEach((el) => {
+    if (el) el.disabled = true;
+  });
+  setStatus(disabledMsg, true);
+} else {
+  bindAdminHandlers();
+  setStatus("页面已就绪，请输入 PAT 后操作。");
+}
