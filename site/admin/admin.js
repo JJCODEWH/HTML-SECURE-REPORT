@@ -223,6 +223,55 @@ function decodeBase64ToText(base64Text) {
   return new TextDecoder("utf-8").decode(bytes);
 }
 
+function encodeTextToBase64(text) {
+  const bytes = new TextEncoder().encode(String(text || ""));
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+async function getRepoTextFile({ owner, repo, branch, token, path }) {
+  const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}?ref=${encodeURIComponent(branch)}`;
+  const { res, data } = await requestJson(url, "GET", token);
+  if (res.status === 404) {
+    return { exists: false, sha: null, text: "" };
+  }
+  if (!res.ok) {
+    const message = data && data.message ? data.message : `HTTP ${res.status}`;
+    throw new Error(`读取 ${path} 失败：${message}`);
+  }
+  if (!data?.content || !data?.sha) {
+    throw new Error(`读取 ${path} 失败：文件内容为空。`);
+  }
+  return {
+    exists: true,
+    sha: data.sha,
+    text: decodeBase64ToText(data.content),
+  };
+}
+
+async function upsertRepoTextFile({
+  owner,
+  repo,
+  branch,
+  token,
+  path,
+  message,
+  text,
+  sha,
+}) {
+  const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`;
+  const body = {
+    message,
+    content: encodeTextToBase64(text),
+    branch,
+    ...(sha ? { sha } : {}),
+  };
+  return requestJson(url, "PUT", token, body);
+}
+
 async function viewKeyByDocId() {
   const { owner, repo, branch, token } = mustGetConfig();
   const selectedDocId = normalizeDocId(docIdEl.value || incomingSelectEl.value);
@@ -237,30 +286,19 @@ async function viewKeyByDocId() {
 
   try {
     const keyMapPath = "admin/key-map.csv";
-    const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${keyMapPath}?ref=${encodeURIComponent(branch)}`;
-    const { res, data } = await requestJson(url, "GET", token);
-
-    let csvText = "";
-    if (res.ok && data?.content) {
-      try {
-        csvText = decodeBase64ToText(data.content);
-      } catch (_err) {
-        csvText = "";
-      }
-    }
-
-    // Fallback: request raw csv text directly.
+    const repoFile = await getRepoTextFile({
+      owner,
+      repo,
+      branch,
+      token,
+      path: keyMapPath,
+    });
+    let csvText = repoFile.text;
     if (!csvText) {
       const rawUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${keyMapPath}?ref=${encodeURIComponent(branch)}`;
       const rawResp = await requestText(rawUrl, "GET", token);
       if (!rawResp.res.ok || !rawResp.text) {
-        const message =
-          (data && data.message) || rawResp.text || `HTTP ${res.status}`;
-        if (res.status === 401 || res.status === 403) {
-          throw new Error(
-            `读取 key-map 失败：无权限（${message}）。请检查 PAT 是否有私有仓库 Contents: Read。`
-          );
-        }
+        const message = rawResp.text || `HTTP ${rawResp.res.status}`;
         throw new Error(`读取 key-map 失败：${message}`);
       }
       csvText = rawResp.text;
@@ -367,16 +405,17 @@ async function deleteIncomingByDocId() {
       );
     }
 
-    const path = `incoming/${targetFile}`;
-    setStatus(`正在删除 ${path} ...`);
-    const sha = await getFileSha({ owner, repo, branch, token, path });
+    const incomingPath = `incoming/${targetFile}`;
+    const normalizedDocId = normalizeDocId(targetFile);
+    setStatus(`正在删除 ${incomingPath} ...`);
+    const sha = await getFileSha({ owner, repo, branch, token, path: incomingPath });
     if (!sha) {
-      throw new Error(`文件不存在：${path}`);
+      throw new Error(`文件不存在：${incomingPath}`);
     }
 
-    const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`;
+    const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${incomingPath}`;
     const body = {
-      message: `chore: delete incoming html (${docId}) via public admin page`,
+      message: `chore: delete incoming html (${normalizedDocId}) via public admin page`,
       sha,
       branch,
     };
@@ -387,11 +426,93 @@ async function deleteIncomingByDocId() {
     }
 
     const commitUrl = data?.commit?.html_url || "";
+
+    // Also remove key-map row for this doc, so "View KEY" no longer returns stale data.
+    let keyMapUpdated = false;
+    const keyMapPath = "admin/key-map.csv";
+    const keyMapFile = await getRepoTextFile({
+      owner,
+      repo,
+      branch,
+      token,
+      path: keyMapPath,
+    });
+    if (keyMapFile.exists) {
+      const allLines = keyMapFile.text.replace(/\r/g, "").split("\n");
+      if (allLines.length > 0) {
+        const headers = parseCsvRow(allLines[0]);
+        const docIdx = headers.indexOf("doc_id");
+        if (docIdx >= 0) {
+          const kept = [allLines[0]];
+          for (let i = 1; i < allLines.length; i += 1) {
+            const line = allLines[i];
+            if (!line.trim()) continue;
+            const cols = parseCsvRow(line);
+            const lineDocId = normalizeDocId(cols[docIdx] || "");
+            if (lineDocId !== normalizedDocId) {
+              kept.push(line);
+            }
+          }
+          if (kept.length !== allLines.filter((x) => x.trim()).length) {
+            const csvOut = `${kept.join("\n")}\n`;
+            const updateResp = await upsertRepoTextFile({
+              owner,
+              repo,
+              branch,
+              token,
+              path: keyMapPath,
+              message: `chore: remove key-map row (${normalizedDocId}) via public admin page`,
+              text: csvOut,
+              sha: keyMapFile.sha,
+            });
+            if (!updateResp.res.ok) {
+              const message =
+                updateResp.data && updateResp.data.message
+                  ? updateResp.data.message
+                  : `HTTP ${updateResp.res.status}`;
+              throw new Error(`incoming 已删，但更新 key-map 失败：${message}`);
+            }
+            keyMapUpdated = true;
+          }
+        }
+      }
+    }
+
+    // Best effort: remove admin/keys/<doc-id>.txt if present.
+    let keyFileDeleted = false;
+    const keyFilePath = `admin/keys/${normalizedDocId}.txt`;
+    const keyFileSha = await getFileSha({
+      owner,
+      repo,
+      branch,
+      token,
+      path: keyFilePath,
+    });
+    if (keyFileSha) {
+      const delKeyUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${keyFilePath}`;
+      const delKeyBody = {
+        message: `chore: delete key file (${normalizedDocId}) via public admin page`,
+        sha: keyFileSha,
+        branch,
+      };
+      const delKeyResp = await requestJson(delKeyUrl, "DELETE", token, delKeyBody);
+      if (!delKeyResp.res.ok) {
+        const message =
+          delKeyResp.data && delKeyResp.data.message
+            ? delKeyResp.data.message
+            : `HTTP ${delKeyResp.res.status}`;
+        throw new Error(`incoming 已删，但删除 key 文件失败：${message}`);
+      }
+      keyFileDeleted = true;
+    }
+
     const actionsUrl = `https://github.com/${owner}/${repo}/actions`;
     setStatus(
       `删除成功。\n` +
-        `doc: ${docId || normalizeDocId(targetFile)}\n` +
-        `deleted: ${path}\n` +
+        `doc: ${docId || normalizedDocId}\n` +
+        `deleted: ${incomingPath}\n` +
+        `key-map: ${keyMapUpdated ? "已移除对应记录" : "未找到对应记录"}\n` +
+        `key-file: ${keyFileDeleted ? "已删除" : "未找到"}\n` +
         (commitUrl ? `commit: ${commitUrl}\n` : "") +
         `actions: ${actionsUrl}`
     );
