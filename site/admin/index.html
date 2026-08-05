@@ -7,33 +7,47 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f4f6f8;
+        --bg: #f3f5f9;
         --surface: #ffffff;
-        --line: #d7dde4;
-        --text: #1f2933;
-        --muted: #667085;
-        --primary: #0f766e;
-        --primary-press: #0b5e57;
-        --secondary: #eef2f6;
+        --surface-tint: #fafbff;
+        --line: #d9dee8;
+        --line-strong: #c6cedc;
+        --text: #1e293b;
+        --muted: #64748b;
+        --primary: #0e7490;
+        --primary-press: #0b5f75;
+        --secondary: #eff3f8;
+        --accent: #b45309;
+        --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
+        --shadow-md: 0 10px 24px rgba(16, 24, 40, 0.06);
       }
       body {
         margin: 0;
         font-family: "Segoe UI", Arial, sans-serif;
-        background: var(--bg);
+        background:
+          radial-gradient(1200px 420px at 0% -10%, #ffffff 0%, transparent 60%),
+          radial-gradient(900px 360px at 100% -15%, #eef4ff 0%, transparent 55%),
+          var(--bg);
         color: var(--text);
       }
       .wrap {
         max-width: 1120px;
-        margin: 24px auto;
+        margin: 30px auto;
         padding: 0 20px 28px;
       }
       .header {
-        margin-bottom: 16px;
+        margin-bottom: 18px;
+        padding: 16px 18px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: linear-gradient(135deg, #ffffff, #f7fafe);
+        box-shadow: var(--shadow-sm);
       }
       .header h1 {
         margin: 0;
         font-size: 30px;
         line-height: 1.2;
+        letter-spacing: 0;
       }
       .header p {
         margin: 8px 0 0;
@@ -46,10 +60,11 @@
         gap: 14px;
       }
       .block {
-        background: var(--surface);
+        background: linear-gradient(180deg, var(--surface), var(--surface-tint));
         border: 1px solid var(--line);
         border-radius: 8px;
         padding: 14px;
+        box-shadow: var(--shadow-sm);
       }
       .row {
         display: grid;
@@ -72,8 +87,9 @@
       }
       .section-title {
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 800;
         margin: 0 0 10px;
+        color: #0f172a;
       }
       .label {
         font-size: 12px;
@@ -93,6 +109,17 @@
         color: var(--text);
         padding: 8px 12px;
         font-size: 14px;
+        transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+      }
+      input:hover,
+      select:hover {
+        border-color: var(--line-strong);
+      }
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #0891b2;
+        box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.16);
       }
       button {
         min-height: 40px;
@@ -104,14 +131,25 @@
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
+        transition: transform 80ms ease, box-shadow 120ms ease, filter 120ms ease, border-color 120ms ease;
+        box-shadow: var(--shadow-sm);
       }
       button:hover {
-        filter: brightness(0.98);
+        border-color: var(--line-strong);
+        filter: brightness(0.99);
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      button:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18);
       }
       .btn-primary {
         background: var(--primary);
         border-color: var(--primary);
         color: #fff;
+        box-shadow: 0 6px 14px rgba(14, 116, 144, 0.22);
       }
       .btn-primary:active {
         background: var(--primary-press);
@@ -123,24 +161,28 @@
         color: var(--muted);
       }
       code {
-        background: #f2f5f7;
-        border: 1px solid #e6ebef;
+        background: #f6f8fc;
+        border: 1px solid #e5eaf3;
         border-radius: 4px;
         padding: 1px 5px;
+        color: #334155;
       }
       #status {
         min-height: 88px;
-        border: 1px solid var(--line);
+        border: 1px solid #dbe3ef;
         border-radius: 6px;
-        background: #fafbfc;
+        background: linear-gradient(180deg, #fcfdff, #f7faff);
         padding: 10px 12px;
         white-space: pre-wrap;
         font-size: 14px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
       }
       .hint {
         margin: 0;
         font-size: 13px;
         color: var(--muted);
+        border-left: 3px solid rgba(180, 83, 9, 0.45);
+        padding-left: 9px;
       }
       .full {
         grid-column: 1 / -1;
