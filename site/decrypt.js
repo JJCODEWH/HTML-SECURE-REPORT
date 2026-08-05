@@ -6,10 +6,10 @@ const unlockPanelEl = document.getElementById("unlockPanel");
 const docIdEl = document.getElementById("docId");
 
 const textEncoder = new TextEncoder();
-const textDecoder = new TextDecoder();
 const url = new URL(window.location.href);
 const rawDocId = url.searchParams.get("doc") || "default";
 const docId = /^[a-zA-Z0-9_-]+$/.test(rawDocId) ? rawDocId : "default";
+let activeBlobUrl = null;
 
 if (docIdEl) docIdEl.textContent = docId;
 
@@ -23,6 +23,10 @@ function b64ToBytes(b64) {
 function setStatus(msg, isError = false) {
   statusEl.textContent = msg;
   statusEl.style.color = isError ? "#d33" : "";
+}
+
+function toHex(bytes) {
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 async function deriveAesKey(secret, saltBytes, iterations) {
@@ -78,8 +82,27 @@ async function tryUnlock() {
       key,
       b64ToBytes(payload.ciphertext)
     );
+    const plaintextBytes = new Uint8Array(plaintextBuffer);
+    if (
+      Number.isInteger(payload.inputSize) &&
+      plaintextBytes.byteLength !== payload.inputSize
+    ) {
+      throw new Error("size check failed");
+    }
+    if (payload.inputSha256) {
+      const digest = await crypto.subtle.digest("SHA-256", plaintextBuffer);
+      const digestHex = toHex(new Uint8Array(digest));
+      if (digestHex !== String(payload.inputSha256).toLowerCase()) {
+        throw new Error("sha256 check failed");
+      }
+    }
 
-    viewerEl.srcdoc = textDecoder.decode(plaintextBuffer);
+    if (activeBlobUrl) URL.revokeObjectURL(activeBlobUrl);
+    const blob = new Blob([plaintextBytes], {
+      type: payload.mimeType || "text/html",
+    });
+    activeBlobUrl = URL.createObjectURL(blob);
+    viewerEl.src = activeBlobUrl;
     viewerEl.style.display = "block";
     unlockPanelEl.style.display = "none";
     setStatus(`Unlocked: ${docId}`);
