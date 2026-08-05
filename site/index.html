@@ -296,22 +296,6 @@
         gap: 10px;
       }
 
-      #adminEmbedWrap {
-        margin-top: 10px;
-        border: 1px solid #dbe3ef;
-        border-radius: 6px;
-        overflow: hidden;
-        background: #fff;
-        display: none;
-      }
-
-      #adminEmbedFrame {
-        width: 100%;
-        height: 560px;
-        border: 0;
-        display: block;
-      }
-
       .viewer-panel:fullscreen {
         width: 100vw;
         height: 100vh;
@@ -418,15 +402,12 @@
           <div class="control">
             <div class="admin-toggle-row">
               <p class="status-title">管理员操作</p>
-              <button id="adminEmbedToggle" class="btn-ghost" type="button">展开管理界面</button>
-            </div>
-            <div id="adminEmbedWrap">
-              <iframe id="adminEmbedFrame" src="./admin/" loading="lazy"></iframe>
+              <button id="adminJumpBtn" class="btn-ghost" type="button">进入管理界面</button>
             </div>
           </div>
         </section>
       </section>
     </main>
-    <script type="module" src="./decrypt.js?v=20260805-view-5"></script>
+    <script type="module" src="./decrypt.js?v=20260805-view-6"></script>
   </body>
 </html>

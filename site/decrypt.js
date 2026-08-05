@@ -8,8 +8,7 @@ const viewerEl = document.getElementById("viewer");
 const viewerEmptyEl = document.getElementById("viewerEmpty");
 const viewerPanelEl = document.getElementById("viewerPanel");
 const fullscreenBtnEl = document.getElementById("fullscreenBtn");
-const adminEmbedToggleEl = document.getElementById("adminEmbedToggle");
-const adminEmbedWrapEl = document.getElementById("adminEmbedWrap");
+const adminJumpBtnEl = document.getElementById("adminJumpBtn");
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
@@ -86,16 +85,8 @@ function setFullscreenButtonLabel() {
   fullscreenBtnEl.textContent = isViewerFullscreen() ? "退出全屏" : "全屏展开";
 }
 
-function setAdminEmbedLabel(expanded) {
-  if (!adminEmbedToggleEl) return;
-  adminEmbedToggleEl.textContent = expanded ? "收起管理界面" : "展开管理界面";
-}
-
-function toggleAdminEmbed() {
-  if (!adminEmbedWrapEl) return;
-  const expanded = adminEmbedWrapEl.style.display !== "none";
-  adminEmbedWrapEl.style.display = expanded ? "none" : "block";
-  setAdminEmbedLabel(!expanded);
+function jumpToAdmin() {
+  window.location.href = "./admin/";
 }
 
 async function toggleViewerFullscreen() {
@@ -295,8 +286,8 @@ if (docSelectEl) {
 if (fullscreenBtnEl) {
   fullscreenBtnEl.addEventListener("click", toggleViewerFullscreen);
 }
-if (adminEmbedToggleEl) {
-  adminEmbedToggleEl.addEventListener("click", toggleAdminEmbed);
+if (adminJumpBtnEl) {
+  adminJumpBtnEl.addEventListener("click", jumpToAdmin);
 }
 document.addEventListener("fullscreenchange", setFullscreenButtonLabel);
 document.addEventListener("webkitfullscreenchange", setFullscreenButtonLabel);
@@ -307,4 +298,3 @@ lockViewer(`当前文档：${docId}<br />请在右侧输入 KEY 访问。`);
 setDocState("待解锁");
 setStatus("页面已就绪，请输入 KEY。");
 setFullscreenButtonLabel();
-setAdminEmbedLabel(false);
