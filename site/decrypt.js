@@ -66,7 +66,8 @@ function setDocState(msg) {
 
 function updateDocSelectPlaceholderState() {
   if (!docSelectEl) return;
-  docSelectEl.classList.toggle("select-placeholder", !String(docSelectEl.value || "").trim());
+  const noSelection = docSelectEl.selectedIndex < 0 || !String(docSelectEl.value || "").trim();
+  docSelectEl.classList.toggle("select-placeholder", noSelection);
 }
 
 function lockViewer(message) {
@@ -234,21 +235,27 @@ async function initDocSelector() {
   if (uniqueDocs.length === 0) {
     uniqueDocs.push({ docId: "default", label: "default" });
   }
-  if (!uniqueDocs.some((x) => x.docId === docId)) {
+
+  const hasMatchedDoc = uniqueDocs.some((x) => x.docId === docId);
+  if (hasDocQuery && !hasMatchedDoc) {
     setDocId(uniqueDocs[0].docId, false);
   }
-  if (docSelectEl) {
-    docSelectEl.innerHTML = [
-      '<option value="" disabled selected hidden>选择文档</option>',
-      ...uniqueDocs.map((x) => `<option value="${x.docId}">${x.label}</option>`),
-    ].join("");
-    if (hasDocQuery && uniqueDocs.some((x) => x.docId === docId)) {
-      docSelectEl.value = docId;
-    } else {
-      docSelectEl.value = "";
-    }
-    updateDocSelectPlaceholderState();
+
+  if (!docSelectEl) return;
+
+  docSelectEl.innerHTML = uniqueDocs
+    .map((x) => `<option value="${x.docId}">${x.label}</option>`)
+    .join("");
+
+  if (hasDocQuery && hasMatchedDoc) {
+    docSelectEl.value = docId;
+  } else if (hasDocQuery) {
+    docSelectEl.value = uniqueDocs[0].docId;
+  } else {
+    docSelectEl.selectedIndex = -1;
   }
+
+  updateDocSelectPlaceholderState();
 }
 
 async function loadPayload() {
@@ -263,7 +270,7 @@ async function loadPayload() {
 }
 
 async function tryUnlock() {
-  if (docSelectEl && !String(docSelectEl.value || "").trim()) {
+  if (docSelectEl && (docSelectEl.selectedIndex < 0 || !String(docSelectEl.value || "").trim())) {
     updateDocSelectPlaceholderState();
     setStatus("请先选择文档。", true);
     return;
@@ -283,21 +290,14 @@ async function tryUnlock() {
     if (payload.version !== 1) throw new Error("unsupported payload version");
     if (payload.kdf !== "PBKDF2-SHA256") throw new Error("unsupported kdf");
 
-    const key = await deriveAesKey(
-      secret,
-      b64ToBytes(payload.salt),
-      Number(payload.iterations)
-    );
+    const key = await deriveAesKey(secret, b64ToBytes(payload.salt), Number(payload.iterations));
     const plaintextBuffer = await crypto.subtle.decrypt(
       { name: "AES-GCM", iv: b64ToBytes(payload.iv) },
       key,
       b64ToBytes(payload.ciphertext)
     );
     const plaintextBytes = new Uint8Array(plaintextBuffer);
-    if (
-      Number.isInteger(payload.inputSize) &&
-      plaintextBytes.byteLength !== payload.inputSize
-    ) {
+    if (Number.isInteger(payload.inputSize) && plaintextBytes.byteLength !== payload.inputSize) {
       throw new Error("size check failed");
     }
     if (payload.inputSha256) {
@@ -309,19 +309,14 @@ async function tryUnlock() {
     }
 
     let renderBytes = plaintextBytes;
-    if (
-      forceDesktop &&
-      (payload.mimeType || "text/html").includes("text/html")
-    ) {
+    if (forceDesktop && (payload.mimeType || "text/html").includes("text/html")) {
       const html = textDecoder.decode(plaintextBytes);
       const patchedHtml = injectDesktopOverride(html);
       renderBytes = textEncoder.encode(patchedHtml);
     }
 
     if (activeBlobUrl) URL.revokeObjectURL(activeBlobUrl);
-    const blob = new Blob([renderBytes], {
-      type: payload.mimeType || "text/html",
-    });
+    const blob = new Blob([renderBytes], { type: payload.mimeType || "text/html" });
     activeBlobUrl = URL.createObjectURL(blob);
     openViewer(activeBlobUrl);
     setDocState("已解锁");
@@ -337,9 +332,16 @@ async function tryUnlock() {
   }
 }
 
-function applySelectedDoc() {
-  const selected = sanitizeDocId(docSelectEl?.value || docId);
+function handleDocSelection() {
+  if (!docSelectEl) return;
+  const selectedRaw = String(docSelectEl.value || "").trim();
+  if (!selectedRaw) {
+    updateDocSelectPlaceholderState();
+    return;
+  }
+  const selected = sanitizeDocId(selectedRaw);
   setDocId(selected, true);
+  updateDocSelectPlaceholderState();
   lockViewer(`当前文档：${selected}<br />请输入对应 KEY。`);
   setDocState("待解锁");
   setStatus(`已切换文档：${selected}`);
@@ -352,20 +354,7 @@ function attachViewerHandlers() {
     if (e.key === "Enter") tryUnlock();
   });
   if (docSelectEl) {
-    docSelectEl.addEventListener("change", () => {
-      const selectedRaw = String(docSelectEl.value || "").trim();
-      if (!selectedRaw) {
-        updateDocSelectPlaceholderState();
-        return;
-      }
-      const selected = sanitizeDocId(selectedRaw);
-      setDocId(selected, true);
-      updateDocSelectPlaceholderState();
-      lockViewer(`当前文档：${selected}<br />请输入对应 KEY。`);
-      setDocState("待解锁");
-      setStatus(`已切换文档：${selected}`);
-      keyInputEl.focus();
-    });
+    docSelectEl.addEventListener("change", handleDocSelection);
   }
   if (fullscreenBtnEl) {
     fullscreenBtnEl.addEventListener("click", toggleViewerFullscreen);
@@ -385,41 +374,29 @@ function disableViewerControls() {
   if (fullscreenBtnEl) fullscreenBtnEl.disabled = true;
 }
 
+async function initViewerReadyState() {
+  await initDocSelector();
+  const selectedRaw = docSelectEl ? String(docSelectEl.value || "").trim() : "";
+  if (!selectedRaw) {
+    if (docIdEl) docIdEl.textContent = "-";
+    lockViewer("请先选择文档，然后输入 KEY 访问。");
+    setDocState("待选择");
+    setStatus("请先选择文档，然后输入 KEY。");
+  } else {
+    lockViewer(`当前文档：${docId}<br />请在右侧输入 KEY 访问。`);
+    setDocState("待解锁");
+    setStatus("页面已就绪，请输入 KEY。");
+  }
+  setFullscreenButtonLabel();
+}
+
 const compat = browserCompat();
-if (false && !compat.ok) {
+if (!compat.ok) {
   disableViewerControls();
   setDocState("浏览器不兼容");
   lockViewer("当前浏览器不支持解密能力，请使用 Chrome / Edge 最新版，或 Safari 15+。");
   setStatus(
     compat.isIE
-      ? "当前是 IE/IE 模式，无法访问。请改用 Chrome / Edge 或 Safari 15+。"
-      : "当前浏览器能力不足，无法访问。请改用 Chrome / Edge 最新版，或 Safari 15+。",
-    true
-  );
-} else if (false) {
-  attachViewerHandlers();
-  initDocSelector();
-lockViewer(`当前文档：${docId}<br />请在右侧输入 KEY 访问。`);
-setDocState("待解锁");
-setStatus("页面已就绪，请输入 KEY。");
-setFullscreenButtonLabel();
-}
-
-async function initViewerReadyState() {
-  await initDocSelector();
-  lockViewer(`当前文档：${docId}<br />请在右侧输入 KEY 访问。`);
-  setDocState("待解锁");
-  setStatus("页面已就绪，请输入 KEY。");
-  setFullscreenButtonLabel();
-}
-
-const compat2 = browserCompat();
-if (!compat2.ok) {
-  disableViewerControls();
-  setDocState("浏览器不兼容");
-  lockViewer("当前浏览器不支持解密能力，请使用 Chrome / Edge 最新版，或 Safari 15+。");
-  setStatus(
-    compat2.isIE
       ? "当前是 IE/IE 模式，无法访问。请改用 Chrome / Edge 或 Safari 15+。"
       : "当前浏览器能力不足，无法访问。请改用 Chrome / Edge 最新版，或 Safari 15+。",
     true
