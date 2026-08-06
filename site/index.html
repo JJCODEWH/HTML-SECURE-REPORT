@@ -7,20 +7,20 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f2f5fb;
+        --bg: #eef3fb;
         --surface: #ffffff;
-        --surface-soft: #f8fbff;
-        --line: #d7deea;
-        --line-strong: #bcc7d8;
-        --text: #0f172a;
-        --muted: #64748b;
-        --primary: #0e7490;
-        --primary-press: #0b5f75;
-        --accent: #4f46e5;
-        --secondary: #eef3f9;
+        --surface-soft: #f6f9ff;
+        --line: #d5deec;
+        --line-strong: #bdcbe1;
+        --text: #12213f;
+        --muted: #5e6f8e;
+        --primary: #2563eb;
+        --primary-press: #1d4ed8;
+        --accent: #0f766e;
+        --secondary: #ebf1ff;
         --ok: #0f766e;
-        --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
-        --shadow-md: 0 12px 28px rgba(15, 23, 42, 0.08);
+        --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+        --shadow-md: 0 14px 30px rgba(30, 64, 175, 0.12);
       }
 
       * {
@@ -31,8 +31,9 @@
         margin: 0;
         font-family: "Segoe UI", Arial, sans-serif;
         background:
-          radial-gradient(1250px 420px at 0% -20%, #ffffff 0%, transparent 58%),
-          radial-gradient(900px 420px at 100% -20%, #e9f0ff 0%, transparent 56%),
+          radial-gradient(1200px 440px at 0% -25%, #ffffff 0%, transparent 58%),
+          radial-gradient(920px 420px at 100% -20%, #e9f0ff 0%, transparent 56%),
+          radial-gradient(900px 420px at 50% -30%, #e7fbff 0%, transparent 60%),
           var(--bg);
         color: var(--text);
       }
@@ -48,7 +49,7 @@
         padding: 16px 18px;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: linear-gradient(125deg, #ffffff, #f6faff 66%, #f1f6ff);
+        background: linear-gradient(125deg, #ffffff, #f4f8ff 60%, #eef5ff);
         box-shadow: var(--shadow-sm);
       }
 
@@ -75,7 +76,7 @@
         background: linear-gradient(180deg, var(--surface), var(--surface-soft));
         border: 1px solid var(--line);
         border-radius: 8px;
-        box-shadow: var(--shadow-sm);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
       }
 
       .viewer-panel {
@@ -89,7 +90,7 @@
         gap: 12px;
         padding: 12px 14px;
         border-bottom: 1px solid var(--line);
-        background: linear-gradient(180deg, #ffffff, #f9fbff);
+        background: linear-gradient(180deg, #ffffff, #f4f8ff);
       }
 
       .title {
@@ -110,10 +111,10 @@
         align-items: center;
         gap: 6px;
         min-height: 28px;
-        border: 1px solid #d3dcef;
+        border: 1px solid #c7d3ea;
         border-radius: 6px;
-        background: #f8faff;
-        color: #334155;
+        background: #f2f7ff;
+        color: #28406b;
         padding: 0 10px;
         font-size: 12px;
       }
@@ -125,11 +126,11 @@
       }
 
       code {
-        border: 1px solid #d8e0ef;
+        border: 1px solid #cdd9ef;
         border-radius: 4px;
-        background: #f5f8fe;
+        background: #eff5ff;
         padding: 2px 7px;
-        color: #1e293b;
+        color: #1f3b66;
       }
 
       .viewer-shell {
@@ -225,8 +226,8 @@
       input:focus,
       select:focus {
         outline: none;
-        border-color: #0891b2;
-        box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.17);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
       }
 
       button {
@@ -244,8 +245,9 @@
 
       .btn-primary {
         border-color: var(--primary);
-        background: linear-gradient(180deg, #1789a7, var(--primary));
+        background: linear-gradient(180deg, #3b82f6, var(--primary));
         color: #fff;
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
       }
 
       .btn-primary:active {
@@ -261,8 +263,8 @@
         padding: 0 10px;
         font-size: 12px;
         border: 1px solid var(--line);
-        border-color: #d3dcec;
-        background: linear-gradient(180deg, #ffffff, #f3f7ff);
+        border-color: #cad7eb;
+        background: linear-gradient(180deg, #ffffff, #edf3ff);
         color: var(--text);
         text-decoration: none;
       }
@@ -275,17 +277,17 @@
         min-height: 42px;
         padding: 0 10px;
         border-radius: 6px;
-        border: 1px solid #cfd8e9;
-        background: linear-gradient(180deg, #fbfdff, #f5f8ff);
-        color: #334155;
+        border: 1px solid #c7d4eb;
+        background: linear-gradient(180deg, #fafdff, #edf4ff);
+        color: #29416a;
         font-size: 13px;
       }
 
       #status {
         min-height: 132px;
-        border: 1px solid #dbe3ef;
+        border: 1px solid #cedaf0;
         border-radius: 6px;
-        background: linear-gradient(180deg, #fcfdff, #f7faff);
+        background: linear-gradient(180deg, #fcfdff, #f0f5ff);
         padding: 10px 12px;
         white-space: pre-wrap;
         font-size: 14px;
@@ -295,7 +297,7 @@
         margin: 0 0 8px;
         font-size: 13px;
         font-weight: 700;
-        color: #334155;
+        color: #2c436b;
       }
 
       .admin-toggle-row {

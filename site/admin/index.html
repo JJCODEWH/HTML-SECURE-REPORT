@@ -7,26 +7,27 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f3f5f9;
+        --bg: #eef3fb;
         --surface: #ffffff;
-        --surface-tint: #fafbff;
-        --line: #d9dee8;
-        --line-strong: #c6cedc;
-        --text: #1e293b;
-        --muted: #64748b;
-        --primary: #0e7490;
-        --primary-press: #0b5f75;
-        --secondary: #eff3f8;
-        --accent: #b45309;
-        --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
-        --shadow-md: 0 10px 24px rgba(16, 24, 40, 0.06);
+        --surface-tint: #f6f9ff;
+        --line: #d5deec;
+        --line-strong: #bdcbe1;
+        --text: #12213f;
+        --muted: #5e6f8e;
+        --primary: #2563eb;
+        --primary-press: #1d4ed8;
+        --secondary: #ebf1ff;
+        --accent: #0f766e;
+        --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+        --shadow-md: 0 12px 28px rgba(30, 64, 175, 0.11);
       }
       body {
         margin: 0;
         font-family: "Segoe UI", Arial, sans-serif;
         background:
-          radial-gradient(1200px 420px at 0% -10%, #ffffff 0%, transparent 60%),
-          radial-gradient(900px 360px at 100% -15%, #eef4ff 0%, transparent 55%),
+          radial-gradient(1200px 440px at 0% -18%, #ffffff 0%, transparent 60%),
+          radial-gradient(930px 380px at 100% -18%, #e8f1ff 0%, transparent 56%),
+          radial-gradient(860px 380px at 50% -30%, #e9fbff 0%, transparent 58%),
           var(--bg);
         color: var(--text);
       }
@@ -39,8 +40,8 @@
         margin-bottom: 18px;
         padding: 16px 18px;
         border: 1px solid var(--line);
-        border-radius: 10px;
-        background: linear-gradient(135deg, #ffffff, #f7fafe);
+        border-radius: 8px;
+        background: linear-gradient(135deg, #ffffff, #f4f8ff 65%, #edf4ff);
         box-shadow: var(--shadow-sm);
       }
       .header-top {
@@ -70,7 +71,7 @@
         border: 1px solid var(--line);
         border-radius: 8px;
         padding: 14px;
-        box-shadow: var(--shadow-sm);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
       }
       .row {
         display: grid;
@@ -101,7 +102,7 @@
         font-size: 14px;
         font-weight: 800;
         margin: 0 0 10px;
-        color: #0f172a;
+        color: #1a2f55;
       }
       .label {
         font-size: 12px;
@@ -130,8 +131,8 @@
       input:focus,
       select:focus {
         outline: none;
-        border-color: #0891b2;
-        box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.16);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
       }
       button {
         min-height: 40px;
@@ -155,7 +156,7 @@
       }
       button:focus-visible {
         outline: none;
-        box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
       }
       .cols-mix > button,
       .cols-key > button,
@@ -163,10 +164,10 @@
         width: 100%;
       }
       .btn-primary {
-        background: var(--primary);
+        background: linear-gradient(180deg, #3b82f6, var(--primary));
         border-color: var(--primary);
         color: #fff;
-        box-shadow: 0 6px 14px rgba(14, 116, 144, 0.22);
+        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
       }
       .btn-primary:active {
         background: var(--primary-press);
@@ -178,8 +179,8 @@
         justify-content: center;
         min-height: 36px;
         border-radius: 6px;
-        border: 1px solid var(--line);
-        background: linear-gradient(180deg, #ffffff, #f5f8ff);
+        border: 1px solid #cad7eb;
+        background: linear-gradient(180deg, #ffffff, #edf3ff);
         color: var(--text);
         padding: 0 12px;
         font-size: 13px;
@@ -192,17 +193,17 @@
         color: var(--muted);
       }
       code {
-        background: #f6f8fc;
-        border: 1px solid #e5eaf3;
+        background: #eff5ff;
+        border: 1px solid #cdd9ef;
         border-radius: 4px;
         padding: 1px 5px;
-        color: #334155;
+        color: #1f3b66;
       }
       #status {
         min-height: 88px;
-        border: 1px solid #dbe3ef;
+        border: 1px solid #cedaf0;
         border-radius: 6px;
-        background: linear-gradient(180deg, #fcfdff, #f7faff);
+        background: linear-gradient(180deg, #fcfdff, #f0f5ff);
         padding: 10px 12px;
         white-space: pre-wrap;
         font-size: 14px;
@@ -212,7 +213,7 @@
         margin: 0;
         font-size: 13px;
         color: var(--muted);
-        border-left: 3px solid rgba(180, 83, 9, 0.45);
+        border-left: 3px solid rgba(37, 99, 235, 0.45);
         padding-left: 9px;
       }
       .full {
