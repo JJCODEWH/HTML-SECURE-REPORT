@@ -363,12 +363,12 @@ async function listIncomingFiles(options = {}) {
     const meta = parseIncomingDisplayMeta(name);
     const opt = document.createElement("option");
     opt.value = name;
-    opt.textContent = `${meta.displayName}（DocID: ${meta.docId}）`;
+    opt.textContent = meta.displayName;
     incomingSelectEl.appendChild(opt);
     if (deleteSelectEl) {
       const deleteOpt = document.createElement("option");
       deleteOpt.value = name;
-      deleteOpt.textContent = `${meta.displayName}（DocID: ${meta.docId}）`;
+      deleteOpt.textContent = meta.displayName;
       deleteSelectEl.appendChild(deleteOpt);
     }
   });
