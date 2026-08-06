@@ -177,7 +177,16 @@ async function loadManifest() {
   const data = await res.json();
   if (!Array.isArray(data?.docs)) return [];
   return data.docs
-    .map((x) => sanitizeDocId(x?.doc_id))
+    .map((x) => {
+      const id = sanitizeDocId(x?.doc_id);
+      if (!id) return null;
+      const inputFile = String(x?.input_file || "");
+      const sourceName = inputFile.split("/").pop() || "";
+      return {
+        docId: id,
+        label: sourceName || id,
+      };
+    })
     .filter(Boolean);
 }
 
@@ -190,35 +199,40 @@ async function docPayloadExists(nextDocId) {
   return legacy.ok;
 }
 
-async function filterAvailableDocIds(docIds) {
+async function filterAvailableDocs(docs) {
   const checks = await Promise.all(
-    docIds.map(async (x) => (await docPayloadExists(x) ? x : ""))
+    docs.map(async (x) => ((await docPayloadExists(x.docId)) ? x : null))
   );
   return checks.filter(Boolean);
 }
 
 async function initDocSelector() {
-  let docIds = [];
+  let docs = [];
   try {
-    docIds = await loadManifest();
+    docs = await loadManifest();
   } catch (_err) {
-    docIds = [];
+    docs = [];
   }
-  let uniqueDocIds = [...new Set(docIds)];
+  const seen = new Set();
+  let uniqueDocs = docs.filter((x) => {
+    if (seen.has(x.docId)) return false;
+    seen.add(x.docId);
+    return true;
+  });
   try {
-    uniqueDocIds = await filterAvailableDocIds(uniqueDocIds);
+    uniqueDocs = await filterAvailableDocs(uniqueDocs);
   } catch (_err) {
-    uniqueDocIds = [];
+    uniqueDocs = [];
   }
-  if (uniqueDocIds.length === 0) {
-    uniqueDocIds.push("default");
+  if (uniqueDocs.length === 0) {
+    uniqueDocs.push({ docId: "default", label: "default" });
   }
-  if (!uniqueDocIds.includes(docId)) {
-    setDocId(uniqueDocIds[0], false);
+  if (!uniqueDocs.some((x) => x.docId === docId)) {
+    setDocId(uniqueDocs[0].docId, false);
   }
   if (docSelectEl) {
-    docSelectEl.innerHTML = uniqueDocIds
-      .map((x) => `<option value="${x}">${x}</option>`)
+    docSelectEl.innerHTML = uniqueDocs
+      .map((x) => `<option value="${x.docId}">${x.label}</option>`)
       .join("");
     docSelectEl.value = docId;
   }
