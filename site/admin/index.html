@@ -124,6 +124,15 @@
         font-size: 14px;
         transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
       }
+      select.select-placeholder {
+        color: var(--muted);
+      }
+      select option {
+        color: var(--text);
+      }
+      select option[value=""] {
+        color: var(--muted);
+      }
       input:hover,
       select:hover {
         border-color: var(--line-strong);

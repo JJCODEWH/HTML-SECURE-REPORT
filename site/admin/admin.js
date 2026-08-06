@@ -295,6 +295,11 @@ function getUploadTargetDocId() {
   return inputDocId || selectedDocId || makeAutoDocId();
 }
 
+function updateSelectPlaceholderState(selectEl) {
+  if (!selectEl) return;
+  selectEl.classList.toggle("select-placeholder", !String(selectEl.value || "").trim());
+}
+
 async function waitForDocRemoved({ owner, repo, branch, token, docId }) {
   const started = Date.now();
   while (Date.now() - started < READY_POLL_TIMEOUT_MS) {
@@ -358,7 +363,7 @@ async function listIncomingFiles(options = {}) {
 
   incomingSelectEl.innerHTML = '<option value="">incoming/ 现有文件（可选）</option>';
   if (deleteSelectEl) {
-    deleteSelectEl.innerHTML = '<option value="">删除区独立列表（可选）</option>';
+    deleteSelectEl.innerHTML = '<option value="">选择要删除的文档</option>';
   }
   files.forEach((name) => {
     const meta = parseIncomingDisplayMeta(name);
@@ -373,6 +378,9 @@ async function listIncomingFiles(options = {}) {
       deleteSelectEl.appendChild(deleteOpt);
     }
   });
+
+  updateSelectPlaceholderState(incomingSelectEl);
+  updateSelectPlaceholderState(deleteSelectEl);
 
   if (!silent) setStatus(`已加载 ${files.length} 个 HTML 文件。`);
 }
@@ -882,6 +890,7 @@ htmlFileEl.addEventListener("change", () => {
 });
 
 incomingSelectEl.addEventListener("change", () => {
+  updateSelectPlaceholderState(incomingSelectEl);
   if (incomingSelectEl.value) {
     const normalized = extractDocIdFromIncomingName(incomingSelectEl.value);
     docIdEl.value = normalized;
@@ -890,6 +899,7 @@ incomingSelectEl.addEventListener("change", () => {
 
 if (deleteSelectEl) {
   deleteSelectEl.addEventListener("change", () => {
+    updateSelectPlaceholderState(deleteSelectEl);
     if (deleteSelectEl.value) {
       deleteDocIdEl.value = extractDocIdFromIncomingName(deleteSelectEl.value);
     }
@@ -980,6 +990,8 @@ keyOutputEl.addEventListener("focus", () => {
 }
 
 syncRepoLabel();
+updateSelectPlaceholderState(incomingSelectEl);
+updateSelectPlaceholderState(deleteSelectEl);
 const compat = browserCompat();
 if (!compat.ok) {
   const disabledMsg = compat.isIE
