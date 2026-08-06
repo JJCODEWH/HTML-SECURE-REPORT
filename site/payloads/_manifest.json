@@ -1,5 +1,11 @@
 {
-  "generated_at": "2026-08-06T05:57:54.531Z",
-  "count": 0,
-  "docs": []
+  "generated_at": "2026-08-06T06:28:52.852Z",
+  "count": 1,
+  "docs": [
+    {
+      "doc_id": "doc-20260806-142810-g6yr",
+      "input_file": "incoming/test - 副本.html",
+      "updated_at": "2026-08-06T06:28:52.851Z"
+    }
+  ]
 }
