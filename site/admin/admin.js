@@ -50,6 +50,22 @@ function normalizeDocId(raw) {
     .replace(/^-+|-+$/g, "");
 }
 
+function extractDocIdFromIncomingName(name) {
+  const base = String(name || "").split("/").pop() || "";
+  const ext = base.replace(/^.*(\.[^.]+)$/, "$1");
+  const noExt = ext !== base ? base.slice(0, -ext.length) : base;
+  const marker = noExt.indexOf("__");
+  const raw = marker > 0 ? noExt.slice(0, marker) : noExt;
+  return normalizeDocId(raw);
+}
+
+function buildIncomingName(docId, originalName) {
+  const cleanDocId = normalizeDocId(docId);
+  const base = String(originalName || "upload.html").split("/").pop().split("\\").pop();
+  const withExt = /\.html?$/i.test(base) ? base : `${base}.html`;
+  return `${cleanDocId}__${withExt}`;
+}
+
 function makeAutoDocId() {
   const now = new Date();
   const pad = (n) => String(n).padStart(2, "0");
@@ -254,7 +270,7 @@ async function waitForDocReady({ owner, repo, branch, token, docId }) {
 
 function getUploadTargetDocId() {
   const inputDocId = normalizeDocId(docIdEl.value);
-  const selectedDocId = normalizeDocId(incomingSelectEl.value);
+  const selectedDocId = extractDocIdFromIncomingName(incomingSelectEl.value);
   return inputDocId || selectedDocId || makeAutoDocId();
 }
 
@@ -462,7 +478,7 @@ async function deleteRepoFileIfExists({
 
 async function viewKeyByDocId() {
   const { owner, repo, branch, token } = mustGetConfig();
-  const selectedDocId = normalizeDocId(docIdEl.value || incomingSelectEl.value);
+  const selectedDocId = normalizeDocId(docIdEl.value) || extractDocIdFromIncomingName(incomingSelectEl.value);
   if (!selectedDocId) {
     throw new Error("请先输入或选择 Doc ID。");
   }
@@ -519,12 +535,36 @@ async function uploadAndTrigger(docIdArg) {
   }
 
   uploadBtnEl.disabled = true;
-  setStatus(`正在上传 incoming/${docId}.html ...`);
+  setStatus(`正在上传文档（doc: ${docId}）...`);
 
   try {
     const content = await fileToBase64(file);
-    const path = `incoming/${docId}.html`;
-    const sha = await getFileSha({ owner, repo, branch, token, path });
+    const files = await fetchIncomingHtmlFiles({ owner, repo, branch, token });
+    const existingName =
+      files.find((name) => extractDocIdFromIncomingName(name) === docId) || "";
+    const incomingName = buildIncomingName(docId, file.name);
+    const oldPath = existingName ? `incoming/${existingName}` : "";
+    const path = `incoming/${incomingName}`;
+    let sha = null;
+
+    if (existingName && existingName !== incomingName) {
+      const oldSha = await getFileSha({ owner, repo, branch, token, path: oldPath });
+      if (oldSha) {
+        const delUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${oldPath}`;
+        const delBody = {
+          message: `chore: replace incoming html (${docId}) via public admin page`,
+          sha: oldSha,
+          branch,
+        };
+        const delResp = await requestJson(delUrl, "DELETE", token, delBody);
+        if (!delResp.res.ok) {
+          const msg = delResp.data && delResp.data.message ? delResp.data.message : `HTTP ${delResp.res.status}`;
+          throw new Error(`删除旧 incoming 失败：${msg}`);
+        }
+      }
+    } else if (existingName === incomingName) {
+      sha = await getFileSha({ owner, repo, branch, token, path });
+    }
     const url = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${path}`;
     const body = {
       message: `chore: upload incoming html (${docId}) via public admin page`,
@@ -546,7 +586,7 @@ async function uploadAndTrigger(docIdArg) {
       `上传成功，已触发自动流程。\n` +
         `doc: ${docId}\n` +
         `source: ${file.name}\n` +
-        `incoming: incoming/${docId}.html\n` +
+        `incoming: ${path}\n` +
         (commitUrl ? `commit: ${commitUrl}\n` : "") +
         `actions: ${actionsUrl}\n` +
         `public: ${publicUrl}`
@@ -561,7 +601,7 @@ async function deleteIncomingByDocId() {
   const { owner, repo, branch, token } = mustGetConfig();
   const selectedFile = String(deleteSelectEl?.value || "").trim();
   const inputDocId = normalizeDocId(deleteDocIdEl?.value);
-  const selectedDocId = normalizeDocId(deleteSelectEl?.value);
+  const selectedDocId = extractDocIdFromIncomingName(deleteSelectEl?.value);
   const docId = inputDocId || selectedDocId;
   if (!selectedFile && !docId) {
     throw new Error("请先输入要删除的 Doc ID，或先选择 existing incoming 文件。");
@@ -578,7 +618,7 @@ async function deleteIncomingByDocId() {
       targetFile = selectedFile;
     } else if (docId) {
       targetFile =
-        files.find((name) => normalizeDocId(name) === docId) || "";
+        files.find((name) => extractDocIdFromIncomingName(name) === docId) || "";
     }
 
     if (!targetFile && docId) {
@@ -593,7 +633,7 @@ async function deleteIncomingByDocId() {
     }
 
     const incomingPath = `incoming/${targetFile}`;
-    const normalizedDocId = normalizeDocId(targetFile);
+    const normalizedDocId = extractDocIdFromIncomingName(targetFile);
     setStatus(`正在删除 ${incomingPath} ...`);
     const sha = await getFileSha({ owner, repo, branch, token, path: incomingPath });
     if (!sha) {
@@ -792,7 +832,7 @@ async function deleteIncomingByDocId() {
     if (docIdEl.value && normalizeDocId(docIdEl.value) === docId) {
       docIdEl.value = "";
     }
-    if (deleteSelectEl && normalizeDocId(deleteSelectEl.value) === docId) {
+    if (deleteSelectEl && extractDocIdFromIncomingName(deleteSelectEl.value) === docId) {
       deleteSelectEl.value = "";
     }
     if (deleteDocIdEl) {
@@ -821,7 +861,7 @@ htmlFileEl.addEventListener("change", () => {
 
 incomingSelectEl.addEventListener("change", () => {
   if (incomingSelectEl.value) {
-    const normalized = normalizeDocId(incomingSelectEl.value);
+    const normalized = extractDocIdFromIncomingName(incomingSelectEl.value);
     docIdEl.value = normalized;
   }
 });
@@ -829,7 +869,7 @@ incomingSelectEl.addEventListener("change", () => {
 if (deleteSelectEl) {
   deleteSelectEl.addEventListener("change", () => {
     if (deleteSelectEl.value) {
-      deleteDocIdEl.value = normalizeDocId(deleteSelectEl.value);
+      deleteDocIdEl.value = extractDocIdFromIncomingName(deleteSelectEl.value);
     }
   });
 }
