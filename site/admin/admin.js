@@ -66,6 +66,26 @@ function buildIncomingName(docId, originalName) {
   return `${cleanDocId}__${withExt}`;
 }
 
+function parseIncomingDisplayMeta(name) {
+  const base = String(name || "").split("/").pop() || "";
+  const ext = base.replace(/^.*(\.[^.]+)$/, "$1");
+  const noExt = ext !== base ? base.slice(0, -ext.length) : base;
+  const marker = noExt.indexOf("__");
+  if (marker > 0) {
+    const prefix = noExt.slice(0, marker);
+    const suffix = noExt.slice(marker + 2);
+    const originalName = suffix ? `${suffix}${ext}` : base;
+    return {
+      docId: normalizeDocId(prefix),
+      displayName: originalName,
+    };
+  }
+  return {
+    docId: extractDocIdFromIncomingName(base),
+    displayName: base,
+  };
+}
+
 function makeAutoDocId() {
   const now = new Date();
   const pad = (n) => String(n).padStart(2, "0");
@@ -340,14 +360,15 @@ async function listIncomingFiles(options = {}) {
     deleteSelectEl.innerHTML = '<option value="">删除区独立列表（可选）</option>';
   }
   files.forEach((name) => {
+    const meta = parseIncomingDisplayMeta(name);
     const opt = document.createElement("option");
     opt.value = name;
-    opt.textContent = name;
+    opt.textContent = `${meta.displayName}（DocID: ${meta.docId}）`;
     incomingSelectEl.appendChild(opt);
     if (deleteSelectEl) {
       const deleteOpt = document.createElement("option");
       deleteOpt.value = name;
-      deleteOpt.textContent = name;
+      deleteOpt.textContent = `${meta.displayName}（DocID: ${meta.docId}）`;
       deleteSelectEl.appendChild(deleteOpt);
     }
   });
