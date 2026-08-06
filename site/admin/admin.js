@@ -10,6 +10,7 @@ const viewKeyBtnEl = document.getElementById("viewKeyBtn");
 const keyOutputEl = document.getElementById("keyOutput");
 const htmlFileEl = document.getElementById("htmlFile");
 const uploadBtnEl = document.getElementById("uploadBtn");
+const deleteSelectEl = document.getElementById("deleteSelect");
 const deleteDocIdEl = document.getElementById("deleteDocId");
 const deleteBtnEl = document.getElementById("deleteBtn");
 const statusEl = document.getElementById("status");
@@ -311,11 +312,20 @@ async function listIncomingFiles(options = {}) {
   const files = await fetchIncomingHtmlFiles({ owner, repo, branch, token });
 
   incomingSelectEl.innerHTML = '<option value="">incoming/ 现有文件（可选）</option>';
+  if (deleteSelectEl) {
+    deleteSelectEl.innerHTML = '<option value="">删除区独立列表（可选）</option>';
+  }
   files.forEach((name) => {
     const opt = document.createElement("option");
     opt.value = name;
     opt.textContent = name;
     incomingSelectEl.appendChild(opt);
+    if (deleteSelectEl) {
+      const deleteOpt = document.createElement("option");
+      deleteOpt.value = name;
+      deleteOpt.textContent = name;
+      deleteSelectEl.appendChild(deleteOpt);
+    }
   });
 
   if (!silent) setStatus(`已加载 ${files.length} 个 HTML 文件。`);
@@ -542,9 +552,9 @@ async function uploadAndTrigger() {
 
 async function deleteIncomingByDocId() {
   const { owner, repo, branch, token } = mustGetConfig();
-  const selectedFile = String(incomingSelectEl.value || "").trim();
+  const selectedFile = String(deleteSelectEl?.value || "").trim();
   const inputDocId = normalizeDocId(deleteDocIdEl?.value);
-  const selectedDocId = normalizeDocId(docIdEl.value || incomingSelectEl.value);
+  const selectedDocId = normalizeDocId(deleteSelectEl?.value);
   const docId = inputDocId || selectedDocId;
   if (!selectedFile && !docId) {
     throw new Error("请先输入要删除的 Doc ID，或先选择 existing incoming 文件。");
@@ -772,11 +782,11 @@ async function deleteIncomingByDocId() {
         `public-repo: ${publicRepoUrl}`
     );
 
-    if (incomingSelectEl.value === `${docId}.html`) {
-      incomingSelectEl.value = "";
-    }
     if (docIdEl.value && normalizeDocId(docIdEl.value) === docId) {
       docIdEl.value = "";
+    }
+    if (deleteSelectEl && normalizeDocId(deleteSelectEl.value) === docId) {
+      deleteSelectEl.value = "";
     }
     if (deleteDocIdEl) {
       deleteDocIdEl.value = "";
@@ -806,11 +816,16 @@ incomingSelectEl.addEventListener("change", () => {
   if (incomingSelectEl.value) {
     const normalized = normalizeDocId(incomingSelectEl.value);
     docIdEl.value = normalized;
-    if (deleteDocIdEl && !deleteDocIdEl.value.trim()) {
-      deleteDocIdEl.value = normalized;
-    }
   }
 });
+
+if (deleteSelectEl) {
+  deleteSelectEl.addEventListener("change", () => {
+    if (deleteSelectEl.value) {
+      deleteDocIdEl.value = normalizeDocId(deleteSelectEl.value);
+    }
+  });
+}
 
 function bindAdminHandlers() {
 loadFilesBtnEl.addEventListener("click", async () => {
@@ -875,7 +890,7 @@ uploadBtnEl.addEventListener("click", async () => {
 deleteBtnEl.addEventListener("click", async () => {
   try {
     const { owner, repo, branch, token } = mustGetConfig();
-    const docId = normalizeDocId(deleteDocIdEl?.value || docIdEl?.value || incomingSelectEl?.value);
+    const docId = normalizeDocId(deleteDocIdEl?.value || deleteSelectEl?.value);
     await deleteIncomingByDocId();
     if (docId) {
       const removed = await waitForDocRemoved({ owner, repo, branch, token, docId });
@@ -913,6 +928,7 @@ if (!compat.ok) {
     viewKeyBtnEl,
     htmlFileEl,
     uploadBtnEl,
+    deleteSelectEl,
     deleteDocIdEl,
     deleteBtnEl,
     keyOutputEl,
