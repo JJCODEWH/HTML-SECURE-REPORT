@@ -1,4 +1,5 @@
 const statusEl = document.getElementById("status");
+document.title = "HTML 安全查看中心";
 const keyInputEl = document.getElementById("keyInput");
 const unlockBtnEl = document.getElementById("unlockBtn");
 const docIdEl = document.getElementById("docId");

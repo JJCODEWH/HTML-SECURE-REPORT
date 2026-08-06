@@ -1,4 +1,5 @@
 const ownerEl = document.getElementById("owner");
+document.title = "HTML 安全管理中心";
 const repoEl = document.getElementById("repo");
 const branchEl = document.getElementById("branch");
 const tokenEl = document.getElementById("token");
