@@ -14,6 +14,7 @@ const adminJumpBtnEl = document.getElementById("adminJumpBtn");
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 const url = new URL(window.location.href);
+const hasDocQuery = url.searchParams.has("doc");
 const forceDesktop = url.searchParams.get("desktop") !== "0";
 let activeBlobUrl = null;
 
@@ -61,6 +62,11 @@ function setStatus(msg, isError = false) {
 
 function setDocState(msg) {
   if (docStateEl) docStateEl.textContent = msg;
+}
+
+function updateDocSelectPlaceholderState() {
+  if (!docSelectEl) return;
+  docSelectEl.classList.toggle("select-placeholder", !String(docSelectEl.value || "").trim());
 }
 
 function lockViewer(message) {
@@ -232,10 +238,16 @@ async function initDocSelector() {
     setDocId(uniqueDocs[0].docId, false);
   }
   if (docSelectEl) {
-    docSelectEl.innerHTML = uniqueDocs
-      .map((x) => `<option value="${x.docId}">${x.label}</option>`)
-      .join("");
-    docSelectEl.value = docId;
+    docSelectEl.innerHTML = [
+      '<option value="" disabled selected hidden>选择文档</option>',
+      ...uniqueDocs.map((x) => `<option value="${x.docId}">${x.label}</option>`),
+    ].join("");
+    if (hasDocQuery && uniqueDocs.some((x) => x.docId === docId)) {
+      docSelectEl.value = docId;
+    } else {
+      docSelectEl.value = "";
+    }
+    updateDocSelectPlaceholderState();
   }
 }
 
@@ -251,6 +263,11 @@ async function loadPayload() {
 }
 
 async function tryUnlock() {
+  if (docSelectEl && !String(docSelectEl.value || "").trim()) {
+    updateDocSelectPlaceholderState();
+    setStatus("请先选择文档。", true);
+    return;
+  }
   const secret = keyInputEl.value;
   if (!secret) {
     setStatus("请先输入 KEY。", true);
@@ -335,7 +352,20 @@ function attachViewerHandlers() {
     if (e.key === "Enter") tryUnlock();
   });
   if (docSelectEl) {
-    docSelectEl.addEventListener("change", applySelectedDoc);
+    docSelectEl.addEventListener("change", () => {
+      const selectedRaw = String(docSelectEl.value || "").trim();
+      if (!selectedRaw) {
+        updateDocSelectPlaceholderState();
+        return;
+      }
+      const selected = sanitizeDocId(selectedRaw);
+      setDocId(selected, true);
+      updateDocSelectPlaceholderState();
+      lockViewer(`当前文档：${selected}<br />请输入对应 KEY。`);
+      setDocState("待解锁");
+      setStatus(`已切换文档：${selected}`);
+      keyInputEl.focus();
+    });
   }
   if (fullscreenBtnEl) {
     fullscreenBtnEl.addEventListener("click", toggleViewerFullscreen);
