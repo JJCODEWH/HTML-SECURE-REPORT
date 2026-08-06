@@ -1,11 +1,5 @@
 {
-  "generated_at": "2026-08-06T05:56:36.189Z",
-  "count": 1,
-  "docs": [
-    {
-      "doc_id": "test",
-      "input_file": "incoming/test.html",
-      "updated_at": "2026-08-06T03:06:07.725Z"
-    }
-  ]
+  "generated_at": "2026-08-06T05:57:54.531Z",
+  "count": 0,
+  "docs": []
 }
