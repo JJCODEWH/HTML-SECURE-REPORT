@@ -243,16 +243,18 @@ async function initDocSelector() {
 
   if (!docSelectEl) return;
 
-  docSelectEl.innerHTML = uniqueDocs
-    .map((x) => `<option value="${x.docId}">${x.label}</option>`)
-    .join("");
+  docSelectEl.innerHTML = [
+    '<option value="">请选择文档</option>',
+    ...uniqueDocs.map((x) => `<option value="${x.docId}">${x.label}</option>`),
+  ].join("");
 
   if (hasDocQuery && hasMatchedDoc) {
     docSelectEl.value = docId;
   } else if (hasDocQuery) {
     docSelectEl.value = uniqueDocs[0].docId;
   } else {
-    docSelectEl.selectedIndex = -1;
+    docSelectEl.value = "";
+    if (docIdEl) docIdEl.textContent = "-";
   }
 
   updateDocSelectPlaceholderState();
