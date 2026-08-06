@@ -32,17 +32,21 @@ function browserCompat() {
 }
 
 function sanitizeDocId(raw) {
-  return /^[a-zA-Z0-9_-]+$/.test(raw || "") ? raw : "default";
+  return /^[a-zA-Z0-9_-]+$/.test(raw || "") ? raw : "";
 }
 
-let docId = sanitizeDocId(url.searchParams.get("doc") || "default");
+let docId = sanitizeDocId(url.searchParams.get("doc") || "");
 
 function setDocId(nextDocId, syncUrl = true) {
   docId = sanitizeDocId(nextDocId);
-  if (docIdEl) docIdEl.textContent = docId;
+  if (docIdEl) docIdEl.textContent = docId || "-";
   if (!syncUrl) return;
   const nextUrl = new URL(window.location.href);
-  nextUrl.searchParams.set("doc", docId);
+  if (docId) {
+    nextUrl.searchParams.set("doc", docId);
+  } else {
+    nextUrl.searchParams.delete("doc");
+  }
   window.history.replaceState({}, "", nextUrl.toString());
 }
 
@@ -199,12 +203,10 @@ async function loadManifest() {
 }
 
 async function docPayloadExists(nextDocId) {
+  if (!nextDocId) return false;
   const payloadPath = `./payloads/${nextDocId}.json?t=${Date.now()}`;
   const res = await fetch(payloadPath, { cache: "no-store" });
-  if (res.ok) return true;
-  if (nextDocId !== "default") return false;
-  const legacy = await fetch(`./payload.json?t=${Date.now()}`, { cache: "no-store" });
-  return legacy.ok;
+  return res.ok;
 }
 
 async function filterAvailableDocs(docs) {
@@ -221,52 +223,45 @@ async function initDocSelector() {
   } catch (_err) {
     docs = [];
   }
+
   const seen = new Set();
   let uniqueDocs = docs.filter((x) => {
     if (seen.has(x.docId)) return false;
     seen.add(x.docId);
     return true;
   });
+
   try {
     uniqueDocs = await filterAvailableDocs(uniqueDocs);
   } catch (_err) {
     uniqueDocs = [];
   }
-  if (uniqueDocs.length === 0) {
-    uniqueDocs.push({ docId: "default", label: "default" });
-  }
 
   const hasMatchedDoc = uniqueDocs.some((x) => x.docId === docId);
   if (hasDocQuery && !hasMatchedDoc) {
-    setDocId(uniqueDocs[0].docId, false);
+    setDocId("", false);
   }
 
   if (!docSelectEl) return;
 
-  docSelectEl.innerHTML = [
-    '<option value="">请选择文档</option>',
-    ...uniqueDocs.map((x) => `<option value="${x.docId}">${x.label}</option>`),
-  ].join("");
+  docSelectEl.innerHTML = uniqueDocs
+    .map((x) => `<option value="${x.docId}">${x.label}</option>`)
+    .join("");
 
   if (hasDocQuery && hasMatchedDoc) {
     docSelectEl.value = docId;
-  } else if (hasDocQuery) {
-    docSelectEl.value = uniqueDocs[0].docId;
   } else {
-    docSelectEl.value = "";
-    if (docIdEl) docIdEl.textContent = "-";
+    docSelectEl.selectedIndex = -1;
+    setDocId("", false);
   }
 
   updateDocSelectPlaceholderState();
 }
 
 async function loadPayload() {
+  if (!docId) throw new Error("empty doc id");
   const payloadPath = `./payloads/${docId}.json?t=${Date.now()}`;
-  let res = await fetch(payloadPath, { cache: "no-store" });
-  if (!res.ok && docId === "default") {
-    // Backward compatibility for legacy single-file mode.
-    res = await fetch(`./payload.json?t=${Date.now()}`, { cache: "no-store" });
-  }
+  const res = await fetch(payloadPath, { cache: "no-store" });
   if (!res.ok) throw new Error(`payload load failed: ${res.status}`);
   return res.json();
 }
@@ -327,7 +322,7 @@ async function tryUnlock() {
   } catch (_err) {
     lockViewer("请在右侧输入正确 KEY 解锁。");
     setDocState("解锁失败");
-    setStatus(`KEY 无效或文档不可用：${docId}`, true);
+    setStatus(`KEY 无效或文档不可用：${docId || "-"}`, true);
     await new Promise((resolve) => setTimeout(resolve, 1200));
     unlockBtnEl.disabled = false;
     keyInputEl.focus();
@@ -338,7 +333,11 @@ function handleDocSelection() {
   if (!docSelectEl) return;
   const selectedRaw = String(docSelectEl.value || "").trim();
   if (!selectedRaw) {
+    setDocId("", true);
     updateDocSelectPlaceholderState();
+    lockViewer("请先选择文档，然后输入 KEY 访问。");
+    setDocState("待选择");
+    setStatus("请先选择文档。");
     return;
   }
   const selected = sanitizeDocId(selectedRaw);
@@ -378,9 +377,15 @@ function disableViewerControls() {
 
 async function initViewerReadyState() {
   await initDocSelector();
+  const hasAnyDoc = !!(docSelectEl && docSelectEl.options && docSelectEl.options.length > 0);
   const selectedRaw = docSelectEl ? String(docSelectEl.value || "").trim() : "";
-  if (!selectedRaw) {
-    if (docIdEl) docIdEl.textContent = "-";
+
+  if (!hasAnyDoc) {
+    setDocId("", false);
+    lockViewer("当前暂无可用文档。");
+    setDocState("无文档");
+    setStatus("当前暂无可用文档。");
+  } else if (!selectedRaw) {
     lockViewer("请先选择文档，然后输入 KEY 访问。");
     setDocState("待选择");
     setStatus("请先选择文档，然后输入 KEY。");
