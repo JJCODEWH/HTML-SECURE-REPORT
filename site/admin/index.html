@@ -7,27 +7,27 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f4f3ef;
-        --surface: #ffffff;
-        --surface-tint: #f8f9f6;
-        --line: #d9dfd7;
-        --line-strong: #bbc7bc;
-        --text: #1c2a25;
-        --muted: #5d6f66;
-        --primary: #0f766e;
-        --primary-press: #0b5f59;
-        --secondary: #edf2ee;
+        --bg: #ece9e2;
+        --surface: #fdfdfb;
+        --surface-tint: #f1f4ef;
+        --line: #c9d2c8;
+        --line-strong: #aab8ab;
+        --text: #16231d;
+        --muted: #4f6258;
+        --primary: #0b5f59;
+        --primary-press: #084844;
+        --secondary: #e1e9e3;
         --accent: #b45309;
-        --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
-        --shadow-md: 0 12px 28px rgba(16, 24, 40, 0.12);
+        --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.08);
+        --shadow-md: 0 12px 28px rgba(16, 24, 40, 0.14);
       }
       body {
         margin: 0;
         font-family: "Segoe UI", Arial, sans-serif;
         background:
-          radial-gradient(1200px 440px at 0% -18%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
-          radial-gradient(930px 380px at 100% -18%, rgba(180, 83, 9, 0.1) 0%, transparent 58%),
-          radial-gradient(860px 380px at 50% -30%, rgba(203, 213, 225, 0.16) 0%, transparent 60%),
+          radial-gradient(1200px 440px at 0% -18%, rgba(16, 185, 129, 0.16) 0%, transparent 60%),
+          radial-gradient(930px 380px at 100% -18%, rgba(180, 83, 9, 0.14) 0%, transparent 58%),
+          radial-gradient(860px 380px at 50% -30%, rgba(148, 163, 184, 0.2) 0%, transparent 60%),
           var(--bg);
         color: var(--text);
       }
@@ -41,7 +41,7 @@
         padding: 16px 18px;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: linear-gradient(135deg, #ffffff, #f8faf8 65%, #f5f7f4);
+        background: linear-gradient(135deg, #fdfdfb, #f1f5f1 65%, #e9efe8);
         box-shadow: var(--shadow-sm);
       }
       .header-top {
@@ -102,7 +102,7 @@
         font-size: 14px;
         font-weight: 800;
         margin: 0 0 10px;
-        color: #365044;
+        color: #2f4a3f;
       }
       .label {
         font-size: 12px;
@@ -118,7 +118,7 @@
         min-height: 40px;
         border: 1px solid var(--line);
         border-radius: 6px;
-        background: #ffffff;
+        background: #fdfefc;
         color: var(--text);
         padding: 8px 12px;
         font-size: 14px;
@@ -132,7 +132,7 @@
       select:focus {
         outline: none;
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+        box-shadow: 0 0 0 3px rgba(11, 95, 89, 0.2);
       }
       button {
         min-height: 40px;
@@ -156,7 +156,7 @@
       }
       button:focus-visible {
         outline: none;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+        box-shadow: 0 0 0 3px rgba(11, 95, 89, 0.2);
       }
       .cols-mix > button,
       .cols-key > button,
@@ -164,10 +164,10 @@
         width: 100%;
       }
       .btn-primary {
-        background: linear-gradient(180deg, #17a39a, var(--primary));
+        background: linear-gradient(180deg, #139188, var(--primary));
         border-color: var(--primary);
         color: #ffffff;
-        box-shadow: 0 8px 18px rgba(15, 118, 110, 0.24);
+        box-shadow: 0 8px 18px rgba(11, 95, 89, 0.28);
       }
       .btn-primary:active {
         background: var(--primary-press);
@@ -179,8 +179,8 @@
         justify-content: center;
         min-height: 36px;
         border-radius: 6px;
-        border: 1px solid #c6d5c8;
-        background: linear-gradient(180deg, #ffffff, #f1f6f2);
+        border: 1px solid #b8c9ba;
+        background: linear-gradient(180deg, #fdfefc, #eaf1eb);
         color: var(--text);
         padding: 0 12px;
         font-size: 13px;
@@ -193,17 +193,17 @@
         color: var(--muted);
       }
       code {
-        background: #f2f7f3;
-        border: 1px solid #c9d9cb;
+        background: #e8f0e9;
+        border: 1px solid #b8cab9;
         border-radius: 4px;
         padding: 1px 5px;
-        color: #2c4a40;
+        color: #254238;
       }
       #status {
         min-height: 88px;
-        border: 1px solid #d1ddd3;
+        border: 1px solid #c2cec4;
         border-radius: 6px;
-        background: linear-gradient(180deg, #fcfdfb, #f3f7f3);
+        background: linear-gradient(180deg, #f8fbf7, #edf2ed);
         padding: 10px 12px;
         white-space: pre-wrap;
         font-size: 14px;
@@ -213,7 +213,7 @@
         margin: 0;
         font-size: 13px;
         color: var(--muted);
-        border-left: 3px solid rgba(180, 83, 9, 0.35);
+        border-left: 3px solid rgba(180, 83, 9, 0.5);
         padding-left: 9px;
       }
       .full {
