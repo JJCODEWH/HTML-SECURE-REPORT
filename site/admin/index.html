@@ -86,10 +86,13 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
       .cols-mix {
-        grid-template-columns: 1.6fr auto auto;
+        grid-template-columns: minmax(0, 1fr) 180px 180px;
       }
       .cols-key {
-        grid-template-columns: auto 1fr;
+        grid-template-columns: 190px minmax(0, 1fr);
+      }
+      .align-end {
+        align-items: end;
       }
       .section-title {
         font-size: 14px;
@@ -150,6 +153,11 @@
       button:focus-visible {
         outline: none;
         box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.18);
+      }
+      .cols-mix > button,
+      .cols-key > button,
+      .cols-2 > button {
+        width: 100%;
       }
       .btn-primary {
         background: var(--primary);
@@ -257,7 +265,7 @@
               <input id="branch" type="text" value="main" placeholder="分支名" />
             </div>
           </div>
-          <div class="row cols-2">
+          <div class="row cols-2 align-end">
             <input id="token" type="password" autocomplete="off" placeholder="管理员 PAT（repo 权限）" />
             <button id="loadFilesBtn" type="button">加载 incoming</button>
           </div>
@@ -265,7 +273,7 @@
 
         <section class="block">
           <p class="section-title">文档与密钥</p>
-          <div class="row cols-2">
+          <div class="row cols-2 align-end">
             <div>
               <p class="label">选择已有文档</p>
               <select id="incomingSelect" aria-label="existing incoming files">
@@ -297,7 +305,7 @@
 
         <section class="block full">
           <p class="section-title">删除文件</p>
-          <div class="row cols-2">
+          <div class="row cols-2 align-end">
             <input id="deleteDocId" type="text" placeholder="输入要删除的 Doc ID（例如 report-001）" />
             <button id="deleteBtn" type="button">删除 incoming 文件</button>
           </div>

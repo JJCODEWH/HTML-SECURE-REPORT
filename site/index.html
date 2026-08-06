@@ -195,6 +195,7 @@
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
+        align-items: end;
       }
 
       .key-row {
@@ -256,7 +257,7 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-height: 30px;
+        min-height: 36px;
         padding: 0 10px;
         font-size: 12px;
         border: 1px solid var(--line);
@@ -269,6 +270,8 @@
       #docState {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
+        width: 100%;
         min-height: 42px;
         padding: 0 10px;
         border-radius: 6px;
@@ -297,9 +300,13 @@
 
       .admin-toggle-row {
         display: flex;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
         gap: 10px;
+      }
+
+      .admin-toggle-row .status-title {
+        margin: 0;
       }
 
       .viewer-panel:fullscreen {
@@ -424,6 +431,6 @@
         document.body.innerHTML = html;
       })();
     </script>
-    <script type="module" src="./decrypt.js?v=20260805-view-11"></script>
+    <script type="module" src="./decrypt.js?v=20260806-view-12"></script>
   </body>
 </html>

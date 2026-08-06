@@ -181,6 +181,22 @@ async function loadManifest() {
     .filter(Boolean);
 }
 
+async function docPayloadExists(nextDocId) {
+  const payloadPath = `./payloads/${nextDocId}.json?t=${Date.now()}`;
+  const res = await fetch(payloadPath, { cache: "no-store" });
+  if (res.ok) return true;
+  if (nextDocId !== "default") return false;
+  const legacy = await fetch(`./payload.json?t=${Date.now()}`, { cache: "no-store" });
+  return legacy.ok;
+}
+
+async function filterAvailableDocIds(docIds) {
+  const checks = await Promise.all(
+    docIds.map(async (x) => (await docPayloadExists(x) ? x : ""))
+  );
+  return checks.filter(Boolean);
+}
+
 async function initDocSelector() {
   let docIds = [];
   try {
@@ -188,7 +204,12 @@ async function initDocSelector() {
   } catch (_err) {
     docIds = [];
   }
-  const uniqueDocIds = [...new Set(docIds)];
+  let uniqueDocIds = [...new Set(docIds)];
+  try {
+    uniqueDocIds = await filterAvailableDocIds(uniqueDocIds);
+  } catch (_err) {
+    uniqueDocIds = [];
+  }
   if (uniqueDocIds.length === 0) {
     uniqueDocIds.push("default");
   }
@@ -320,7 +341,7 @@ function disableViewerControls() {
 }
 
 const compat = browserCompat();
-if (!compat.ok) {
+if (false && !compat.ok) {
   disableViewerControls();
   setDocState("浏览器不兼容");
   lockViewer("当前浏览器不支持解密能力，请使用 Chrome / Edge 最新版，或 Safari 15+。");
@@ -330,11 +351,35 @@ if (!compat.ok) {
       : "当前浏览器能力不足，无法访问。请改用 Chrome / Edge 最新版，或 Safari 15+。",
     true
   );
-} else {
+} else if (false) {
   attachViewerHandlers();
   initDocSelector();
 lockViewer(`当前文档：${docId}<br />请在右侧输入 KEY 访问。`);
 setDocState("待解锁");
 setStatus("页面已就绪，请输入 KEY。");
 setFullscreenButtonLabel();
+}
+
+async function initViewerReadyState() {
+  await initDocSelector();
+  lockViewer(`当前文档：${docId}<br />请在右侧输入 KEY 访问。`);
+  setDocState("待解锁");
+  setStatus("页面已就绪，请输入 KEY。");
+  setFullscreenButtonLabel();
+}
+
+const compat2 = browserCompat();
+if (!compat2.ok) {
+  disableViewerControls();
+  setDocState("浏览器不兼容");
+  lockViewer("当前浏览器不支持解密能力，请使用 Chrome / Edge 最新版，或 Safari 15+。");
+  setStatus(
+    compat2.isIE
+      ? "当前是 IE/IE 模式，无法访问。请改用 Chrome / Edge 或 Safari 15+。"
+      : "当前浏览器能力不足，无法访问。请改用 Chrome / Edge 最新版，或 Safari 15+。",
+    true
+  );
+} else {
+  attachViewerHandlers();
+  initViewerReadyState();
 }
