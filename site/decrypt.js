@@ -15,7 +15,10 @@ const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 const url = new URL(window.location.href);
 const hasDocQuery = url.searchParams.has("doc");
-const forceDesktop = url.searchParams.get("desktop") !== "0";
+const desktopParam = url.searchParams.get("desktop");
+const isMobileUa =
+  /Android|iPhone|iPad|iPod|Windows Phone|Mobile|Mobi/i.test(navigator.userAgent || "");
+const forceDesktop = desktopParam === "1" || (desktopParam === null && !isMobileUa);
 let activeBlobUrl = null;
 
 function browserCompat() {
@@ -82,6 +85,7 @@ function lockViewer(message) {
   if (viewerEl) {
     viewerEl.style.display = "none";
     viewerEl.removeAttribute("src");
+    viewerEl.removeAttribute("srcdoc");
   }
   if (viewerEmptyEl) {
     viewerEmptyEl.style.display = "grid";
@@ -89,10 +93,16 @@ function lockViewer(message) {
   }
 }
 
-function openViewer(blobUrl) {
+function openViewer({ blobUrl, htmlText }) {
   if (viewerEmptyEl) viewerEmptyEl.style.display = "none";
   if (viewerEl) {
     viewerEl.style.display = "block";
+    if (typeof htmlText === "string" && "srcdoc" in viewerEl) {
+      viewerEl.removeAttribute("src");
+      viewerEl.srcdoc = htmlText;
+      return;
+    }
+    viewerEl.removeAttribute("srcdoc");
     viewerEl.src = blobUrl;
   }
 }
@@ -305,17 +315,31 @@ async function tryUnlock() {
       }
     }
 
+    const mimeType = payload.mimeType || "text/html";
+    const isHtmlPayload = mimeType.includes("text/html");
+    let htmlText = "";
     let renderBytes = plaintextBytes;
-    if (forceDesktop && (payload.mimeType || "text/html").includes("text/html")) {
-      const html = textDecoder.decode(plaintextBytes);
-      const patchedHtml = injectDesktopOverride(html);
-      renderBytes = textEncoder.encode(patchedHtml);
+
+    if (isHtmlPayload) {
+      htmlText = textDecoder.decode(plaintextBytes);
+      if (forceDesktop) {
+        htmlText = injectDesktopOverride(htmlText);
+      }
+      renderBytes = textEncoder.encode(htmlText);
     }
 
-    if (activeBlobUrl) URL.revokeObjectURL(activeBlobUrl);
-    const blob = new Blob([renderBytes], { type: payload.mimeType || "text/html" });
-    activeBlobUrl = URL.createObjectURL(blob);
-    openViewer(activeBlobUrl);
+    if (activeBlobUrl) {
+      URL.revokeObjectURL(activeBlobUrl);
+      activeBlobUrl = null;
+    }
+
+    if (isHtmlPayload && viewerEl && "srcdoc" in viewerEl) {
+      openViewer({ htmlText });
+    } else {
+      const blob = new Blob([renderBytes], { type: mimeType });
+      activeBlobUrl = URL.createObjectURL(blob);
+      openViewer({ blobUrl: activeBlobUrl });
+    }
     setDocState("已解锁");
     setStatus(`已解锁：${docId}`);
     unlockBtnEl.disabled = false;
