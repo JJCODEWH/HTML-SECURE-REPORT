@@ -300,6 +300,15 @@ function updateSelectPlaceholderState(selectEl) {
   selectEl.classList.toggle("select-placeholder", !String(selectEl.value || "").trim());
 }
 
+function ensurePlaceholderOption(selectEl) {
+  if (!selectEl || !selectEl.options || selectEl.options.length === 0) return;
+  const first = selectEl.options[0];
+  if (String(first.value || "").trim() !== "") return;
+  first.disabled = true;
+  first.hidden = true;
+  selectEl.value = "";
+}
+
 async function waitForDocRemoved({ owner, repo, branch, token, docId }) {
   const started = Date.now();
   while (Date.now() - started < READY_POLL_TIMEOUT_MS) {
@@ -365,6 +374,9 @@ async function listIncomingFiles(options = {}) {
   if (deleteSelectEl) {
     deleteSelectEl.innerHTML = '<option value="">选择要删除的文档</option>';
   }
+  ensurePlaceholderOption(incomingSelectEl);
+  ensurePlaceholderOption(deleteSelectEl);
+
   files.forEach((name) => {
     const meta = parseIncomingDisplayMeta(name);
     const opt = document.createElement("option");
@@ -990,6 +1002,8 @@ keyOutputEl.addEventListener("focus", () => {
 }
 
 syncRepoLabel();
+ensurePlaceholderOption(incomingSelectEl);
+ensurePlaceholderOption(deleteSelectEl);
 updateSelectPlaceholderState(incomingSelectEl);
 updateSelectPlaceholderState(deleteSelectEl);
 const compat = browserCompat();
