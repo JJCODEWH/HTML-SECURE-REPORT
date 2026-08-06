@@ -50,6 +50,16 @@ function normalizeDocId(raw) {
     .replace(/^-+|-+$/g, "");
 }
 
+function makeAutoDocId() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const ts =
+    `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}` +
+    `-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  const rand = Math.random().toString(36).slice(2, 6);
+  return `doc-${ts}-${rand}`;
+}
+
 function syncRepoLabel() {
   const owner = ownerEl.value.trim() || "owner";
   const repo = repoEl.value.trim() || "repo";
@@ -243,11 +253,9 @@ async function waitForDocReady({ owner, repo, branch, token, docId }) {
 }
 
 function getUploadTargetDocId() {
-  const file = htmlFileEl.files && htmlFileEl.files[0];
-  const fallbackDocId = normalizeDocId(file ? file.name : "");
   const inputDocId = normalizeDocId(docIdEl.value);
   const selectedDocId = normalizeDocId(incomingSelectEl.value);
-  return inputDocId || selectedDocId || fallbackDocId;
+  return inputDocId || selectedDocId || makeAutoDocId();
 }
 
 async function waitForDocRemoved({ owner, repo, branch, token, docId }) {
@@ -498,17 +506,14 @@ async function viewKeyByDocId() {
   }
 }
 
-async function uploadAndTrigger() {
+async function uploadAndTrigger(docIdArg) {
   const { owner, repo, branch, token } = mustGetConfig();
   const file = htmlFileEl.files && htmlFileEl.files[0];
   if (!file) {
     throw new Error("请先选择 HTML 文件。");
   }
 
-  const fallbackDocId = normalizeDocId(file.name);
-  const inputDocId = normalizeDocId(docIdEl.value);
-  const selectedDocId = normalizeDocId(incomingSelectEl.value);
-  const docId = inputDocId || selectedDocId || fallbackDocId;
+  const docId = normalizeDocId(docIdArg || getUploadTargetDocId());
   if (!docId) {
     throw new Error("Doc ID 无效。");
   }
@@ -540,6 +545,7 @@ async function uploadAndTrigger() {
     setStatus(
       `上传成功，已触发自动流程。\n` +
         `doc: ${docId}\n` +
+        `source: ${file.name}\n` +
         `incoming: incoming/${docId}.html\n` +
         (commitUrl ? `commit: ${commitUrl}\n` : "") +
         `actions: ${actionsUrl}\n` +
@@ -548,6 +554,7 @@ async function uploadAndTrigger() {
   } finally {
     uploadBtnEl.disabled = false;
   }
+  return docId;
 }
 
 async function deleteIncomingByDocId() {
@@ -807,8 +814,8 @@ async function deleteIncomingByDocId() {
 });
 
 htmlFileEl.addEventListener("change", () => {
-  if (!docIdEl.value.trim() && htmlFileEl.files && htmlFileEl.files[0]) {
-    docIdEl.value = normalizeDocId(htmlFileEl.files[0].name);
+  if (!docIdEl.value.trim()) {
+    docIdEl.value = "";
   }
 });
 
@@ -858,7 +865,7 @@ uploadBtnEl.addEventListener("click", async () => {
   try {
     const { owner, repo, branch, token } = mustGetConfig();
     const docId = getUploadTargetDocId();
-    await uploadAndTrigger();
+    await uploadAndTrigger(docId);
     if (docId) {
       const actionsUrl = `https://github.com/${owner}/${repo}/actions`;
       const publicUrl = `https://jjcodewh.github.io/HTML-SECURE-REPORT/?doc=${encodeURIComponent(docId)}&desktop=1`;
