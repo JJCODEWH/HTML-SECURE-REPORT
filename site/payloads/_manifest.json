@@ -1,11 +1,16 @@
 {
-  "generated_at": "2026-08-06T02:55:20.143Z",
-  "count": 1,
+  "generated_at": "2026-08-06T02:57:13.703Z",
+  "count": 2,
   "docs": [
+    {
+      "doc_id": "doc-20260806-105639-p1g1",
+      "input_file": "incoming/doc-20260806-105639-p1g1.html",
+      "updated_at": "2026-08-06T02:57:13.454Z"
+    },
     {
       "doc_id": "test",
       "input_file": "incoming/test.html",
-      "updated_at": "2026-08-06T02:47:52.847Z"
+      "updated_at": "2026-08-06T02:57:13.690Z"
     }
   ]
 }
