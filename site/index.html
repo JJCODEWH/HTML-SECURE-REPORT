@@ -6,21 +6,21 @@
     <title>HTML 安全查看中心</title>
     <style>
       :root {
-        color-scheme: light;
-        --bg: #eef3fb;
-        --surface: #ffffff;
-        --surface-soft: #f6f9ff;
-        --line: #d5deec;
-        --line-strong: #bdcbe1;
-        --text: #12213f;
-        --muted: #5e6f8e;
-        --primary: #2563eb;
-        --primary-press: #1d4ed8;
-        --accent: #0f766e;
-        --secondary: #ebf1ff;
-        --ok: #0f766e;
-        --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
-        --shadow-md: 0 14px 30px rgba(30, 64, 175, 0.12);
+        color-scheme: dark;
+        --bg: #0b1220;
+        --surface: #111a2b;
+        --surface-soft: #0f1728;
+        --line: #25324a;
+        --line-strong: #334564;
+        --text: #e6eefc;
+        --muted: #9fb0cc;
+        --primary: #22d3ee;
+        --primary-press: #06b6d4;
+        --accent: #f59e0b;
+        --secondary: #17233a;
+        --ok: #34d399;
+        --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.5);
+        --shadow-md: 0 14px 30px rgba(2, 6, 23, 0.48);
       }
 
       * {
@@ -31,9 +31,9 @@
         margin: 0;
         font-family: "Segoe UI", Arial, sans-serif;
         background:
-          radial-gradient(1200px 440px at 0% -25%, #ffffff 0%, transparent 58%),
-          radial-gradient(920px 420px at 100% -20%, #e9f0ff 0%, transparent 56%),
-          radial-gradient(900px 420px at 50% -30%, #e7fbff 0%, transparent 60%),
+          radial-gradient(1200px 440px at 0% -25%, rgba(34, 211, 238, 0.2) 0%, transparent 60%),
+          radial-gradient(920px 420px at 100% -20%, rgba(99, 102, 241, 0.18) 0%, transparent 58%),
+          radial-gradient(980px 420px at 50% -30%, rgba(245, 158, 11, 0.14) 0%, transparent 62%),
           var(--bg);
         color: var(--text);
       }
@@ -49,7 +49,7 @@
         padding: 16px 18px;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: linear-gradient(125deg, #ffffff, #f4f8ff 60%, #eef5ff);
+        background: linear-gradient(125deg, #16243a, #121d31 62%, #0f1a2d);
         box-shadow: var(--shadow-sm);
       }
 
@@ -76,7 +76,7 @@
         background: linear-gradient(180deg, var(--surface), var(--surface-soft));
         border: 1px solid var(--line);
         border-radius: 8px;
-        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+        box-shadow: 0 12px 26px rgba(2, 6, 23, 0.42);
       }
 
       .viewer-panel {
@@ -90,7 +90,7 @@
         gap: 12px;
         padding: 12px 14px;
         border-bottom: 1px solid var(--line);
-        background: linear-gradient(180deg, #ffffff, #f4f8ff);
+        background: linear-gradient(180deg, #16253b, #121d31);
       }
 
       .title {
@@ -111,10 +111,10 @@
         align-items: center;
         gap: 6px;
         min-height: 28px;
-        border: 1px solid #c7d3ea;
+        border: 1px solid #35507c;
         border-radius: 6px;
-        background: #f2f7ff;
-        color: #28406b;
+        background: #172740;
+        color: #b9cbeb;
         padding: 0 10px;
         font-size: 12px;
       }
@@ -126,16 +126,16 @@
       }
 
       code {
-        border: 1px solid #cdd9ef;
+        border: 1px solid #35507c;
         border-radius: 4px;
-        background: #eff5ff;
+        background: #16253b;
         padding: 2px 7px;
-        color: #1f3b66;
+        color: #bfe0ff;
       }
 
       .viewer-shell {
         min-height: 74vh;
-        background: #ffffff;
+        background: #0a1424;
       }
 
       .viewer-empty {
@@ -149,16 +149,16 @@
 
       .viewer-empty-card {
         width: min(460px, 100%);
-        border: 1px solid #d6deee;
+        border: 1px solid #2f4466;
         border-radius: 8px;
         background:
-          linear-gradient(180deg, #fbfdff, #f5f9ff),
+          linear-gradient(180deg, #172741, #101c30),
           repeating-linear-gradient(
             0deg,
             transparent 0,
             transparent 10px,
-            rgba(148, 163, 184, 0.08) 10px,
-            rgba(148, 163, 184, 0.08) 11px
+            rgba(148, 163, 184, 0.12) 10px,
+            rgba(148, 163, 184, 0.12) 11px
           );
         padding: 20px;
         box-shadow: var(--shadow-md);
@@ -166,7 +166,7 @@
 
       .viewer-empty-card strong {
         display: block;
-        color: #0f172a;
+        color: var(--text);
         font-size: 16px;
         margin-bottom: 8px;
       }
@@ -211,7 +211,7 @@
         min-height: 42px;
         border: 1px solid var(--line);
         border-radius: 6px;
-        background: #fff;
+        background: #0f1a2d;
         color: var(--text);
         padding: 8px 12px;
         font-size: 14px;
@@ -245,8 +245,8 @@
 
       .btn-primary {
         border-color: var(--primary);
-        background: linear-gradient(180deg, #3b82f6, var(--primary));
-        color: #fff;
+        background: linear-gradient(180deg, #34d6f1, var(--primary));
+        color: #03202c;
         box-shadow: 0 8px 18px rgba(37, 99, 235, 0.28);
       }
 
@@ -263,8 +263,8 @@
         padding: 0 10px;
         font-size: 12px;
         border: 1px solid var(--line);
-        border-color: #cad7eb;
-        background: linear-gradient(180deg, #ffffff, #edf3ff);
+        border-color: #35507c;
+        background: linear-gradient(180deg, #192b46, #14253c);
         color: var(--text);
         text-decoration: none;
       }
@@ -277,17 +277,17 @@
         min-height: 42px;
         padding: 0 10px;
         border-radius: 6px;
-        border: 1px solid #c7d4eb;
-        background: linear-gradient(180deg, #fafdff, #edf4ff);
-        color: #29416a;
+        border: 1px solid #35507c;
+        background: linear-gradient(180deg, #162742, #121f36);
+        color: #b9cbeb;
         font-size: 13px;
       }
 
       #status {
         min-height: 132px;
-        border: 1px solid #cedaf0;
+        border: 1px solid #2f4466;
         border-radius: 6px;
-        background: linear-gradient(180deg, #fcfdff, #f0f5ff);
+        background: linear-gradient(180deg, #16263f, #101b2f);
         padding: 10px 12px;
         white-space: pre-wrap;
         font-size: 14px;
@@ -297,7 +297,7 @@
         margin: 0 0 8px;
         font-size: 13px;
         font-weight: 700;
-        color: #2c436b;
+        color: #bcd1f1;
       }
 
       .admin-toggle-row {
