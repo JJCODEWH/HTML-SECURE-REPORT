@@ -1,0 +1,19 @@
+<svg width="960" height="420" viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="420" fill="#f6fbf8"/>
+  <rect x="34" y="28" width="892" height="364" rx="16" fill="#ffffff" stroke="#c9d2c8" stroke-width="2"/>
+  <rect x="64" y="66" width="280" height="40" rx="8" fill="#edf3ea" stroke="#c9d2c8"/>
+  <rect x="64" y="124" width="400" height="38" rx="8" fill="#edf3ea" stroke="#c9d2c8"/>
+  <rect x="64" y="178" width="400" height="38" rx="8" fill="#edf3ea" stroke="#c9d2c8"/>
+  <rect x="64" y="246" width="220" height="52" rx="10" fill="#1b7b71"/>
+  <text x="84" y="92" font-family="Segoe UI, Arial" font-size="20" fill="#22433a">管理员 PAT / 仓库信息</text>
+  <text x="84" y="149" font-family="Segoe UI, Arial" font-size="19" fill="#355547">选择 HTML 文件</text>
+  <text x="84" y="203" font-family="Segoe UI, Arial" font-size="19" fill="#355547">准备上传到 incoming/</text>
+  <text x="90" y="278" font-family="Segoe UI, Arial" font-size="20" fill="#ffffff">上传并触发加密</text>
+  <rect x="520" y="102" width="360" height="190" rx="12" fill="#f3f7f1" stroke="#c9d2c8"/>
+  <text x="548" y="144" font-family="Segoe UI, Arial" font-size="20" fill="#22433a">自动流程</text>
+  <text x="548" y="182" font-family="Segoe UI, Arial" font-size="18" fill="#4f6258">1. 读取 HTML</text>
+  <text x="548" y="214" font-family="Segoe UI, Arial" font-size="18" fill="#4f6258">2. 生成 KEY / payload</text>
+  <text x="548" y="246" font-family="Segoe UI, Arial" font-size="18" fill="#4f6258">3. 更新 manifest</text>
+  <path d="M300 272 L500 272" stroke="#1b7b71" stroke-width="4"/>
+  <path d="M486 262 L500 272 L486 282" fill="none" stroke="#1b7b71" stroke-width="4"/>
+</svg>

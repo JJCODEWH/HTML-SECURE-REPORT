@@ -1,0 +1,18 @@
+<svg width="960" height="420" viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="420" fill="#f6fbf8"/>
+  <rect x="30" y="24" width="900" height="372" rx="16" fill="#ffffff" stroke="#c9d2c8" stroke-width="2"/>
+  <rect x="52" y="52" width="550" height="314" rx="12" fill="#fbfdf9" stroke="#c9d2c8"/>
+  <rect x="74" y="80" width="508" height="32" rx="6" fill="#edf3ea"/>
+  <rect x="74" y="124" width="508" height="220" rx="8" fill="#ffffff" stroke="#dbe4d9"/>
+  <text x="88" y="102" font-family="Segoe UI, Arial" font-size="18" fill="#22433a">文档查看区（解锁后显示原始内容）</text>
+  <rect x="636" y="60" width="264" height="306" rx="12" fill="#f3f7f1" stroke="#c9d2c8"/>
+  <text x="658" y="94" font-family="Segoe UI, Arial" font-size="18" fill="#22433a">KEY 访问</text>
+  <rect x="658" y="118" width="220" height="36" rx="6" fill="#ffffff" stroke="#c9d2c8"/>
+  <rect x="658" y="168" width="220" height="36" rx="6" fill="#ffffff" stroke="#c9d2c8"/>
+  <rect x="658" y="222" width="220" height="44" rx="8" fill="#1b7b71"/>
+  <text x="676" y="143" font-family="Segoe UI, Arial" font-size="16" fill="#4f6258">选择文档</text>
+  <text x="676" y="193" font-family="Segoe UI, Arial" font-size="16" fill="#4f6258">输入 KEY</text>
+  <text x="690" y="250" font-family="Segoe UI, Arial" font-size="18" fill="#ffffff">解锁访问</text>
+  <path d="M638 242 L610 242" stroke="#1b7b71" stroke-width="4"/>
+  <path d="M620 232 L610 242 L620 252" fill="none" stroke="#1b7b71" stroke-width="4"/>
+</svg>

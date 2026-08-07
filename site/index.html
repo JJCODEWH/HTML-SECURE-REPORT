@@ -78,15 +78,6 @@
         background: linear-gradient(180deg, rgba(31, 107, 89, 0.36), rgba(24, 74, 62, 0.24));
       }
 
-      .nav-spacer {
-        flex: 1;
-      }
-
-      .side-nav .nav-btn:nth-of-type(n + 3),
-      .side-nav .nav-spacer {
-        display: none;
-      }
-
       .content {
         padding: 20px;
       }
@@ -411,10 +402,6 @@
           padding: 10px 12px;
         }
 
-        .nav-spacer {
-          display: none;
-        }
-
         .content {
           padding: 14px;
         }
@@ -431,11 +418,9 @@
   <body>
     <div class="app">
       <aside class="side-nav" aria-label="主导航">
+        <a class="nav-btn" href="./home/" aria-label="首页">⌂</a>
         <a class="nav-btn active" href="./" aria-label="查看">▦</a>
         <a class="nav-btn" href="./admin/" aria-label="管理">⚙</a>
-        <a class="nav-btn" href="./admin/" aria-label="上传">⇧</a>
-        <div class="nav-spacer"></div>
-        <a class="nav-btn" href="./admin/" aria-label="更多">⋯</a>
       </aside>
 
       <main class="content">
@@ -512,6 +497,6 @@
         document.body.innerHTML = html;
       })();
     </script>
-    <script type="module" src="./decrypt.js?v=20260807-view-18"></script>
+    <script type="module" src="./decrypt.js?v=20260807-view-19"></script>
   </body>
 </html>

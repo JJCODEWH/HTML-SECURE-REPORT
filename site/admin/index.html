@@ -76,15 +76,6 @@
         background: linear-gradient(180deg, rgba(31, 107, 89, 0.36), rgba(24, 74, 62, 0.24));
       }
 
-      .nav-spacer {
-        flex: 1;
-      }
-
-      .side-nav .nav-btn:nth-of-type(n + 3),
-      .side-nav .nav-spacer {
-        display: none;
-      }
-
       .content {
         padding: 20px;
       }
@@ -303,10 +294,6 @@
           padding: 10px 12px;
         }
 
-        .nav-spacer {
-          display: none;
-        }
-
         .content {
           padding: 14px;
         }
@@ -331,18 +318,16 @@
   <body>
     <div class="app">
       <aside class="side-nav" aria-label="主导航">
-        <a class="nav-btn" href="../" aria-label="查看">▦</a>
+        <a class="nav-btn" href="../home/" aria-label="首页">⌂</a>
+        <a class="nav-btn" href="../?v=20260807-view-19" aria-label="查看">▦</a>
         <a class="nav-btn active" href="./" aria-label="管理">⚙</a>
-        <a class="nav-btn" href="../" aria-label="预览">⧉</a>
-        <div class="nav-spacer"></div>
-        <a class="nav-btn" href="../" aria-label="返回">↩</a>
       </aside>
 
       <main class="content">
         <header class="hero">
           <div class="hero-top">
             <h1>HTML 安全管理中心</h1>
-            <a class="btn-link" href="../?v=20260807-view-18">返回查看界面</a>
+            <a class="btn-link" href="../?v=20260807-view-19">返回查看界面</a>
           </div>
           <p>统一处理 HTML 上传、密钥查询、流程状态检查。</p>
         </header>
@@ -441,6 +426,6 @@
         document.body.innerHTML = html;
       })();
     </script>
-    <script src="./admin.js?v=20260807-12"></script>
+    <script src="./admin.js?v=20260807-13"></script>
   </body>
 </html>

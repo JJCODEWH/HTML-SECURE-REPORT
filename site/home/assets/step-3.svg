@@ -1,0 +1,20 @@
+<svg width="960" height="420" viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="420" fill="#f6fbf8"/>
+  <rect x="34" y="28" width="892" height="364" rx="16" fill="#ffffff" stroke="#c9d2c8" stroke-width="2"/>
+  <text x="68" y="78" font-family="Segoe UI, Arial" font-size="22" fill="#22433a">删除后同步清理</text>
+  <rect x="64" y="106" width="240" height="220" rx="10" fill="#f3f7f1" stroke="#c9d2c8"/>
+  <text x="88" y="150" font-family="Segoe UI, Arial" font-size="18" fill="#355547">incoming</text>
+  <text x="88" y="188" font-family="Segoe UI, Arial" font-size="18" fill="#355547">key-map</text>
+  <text x="88" y="226" font-family="Segoe UI, Arial" font-size="18" fill="#355547">keys</text>
+  <rect x="362" y="106" width="240" height="220" rx="10" fill="#f3f7f1" stroke="#c9d2c8"/>
+  <text x="386" y="150" font-family="Segoe UI, Arial" font-size="18" fill="#355547">payloads</text>
+  <text x="386" y="188" font-family="Segoe UI, Arial" font-size="18" fill="#355547">manifest</text>
+  <text x="386" y="226" font-family="Segoe UI, Arial" font-size="18" fill="#355547">legacy payload</text>
+  <rect x="660" y="128" width="220" height="58" rx="10" fill="#b8403a"/>
+  <text x="722" y="164" font-family="Segoe UI, Arial" font-size="24" fill="#ffffff">删除</text>
+  <rect x="660" y="216" width="220" height="58" rx="10" fill="#1b7b71"/>
+  <text x="700" y="252" font-family="Segoe UI, Arial" font-size="24" fill="#ffffff">清理完成</text>
+  <path d="M306 216 L346 216" stroke="#1b7b71" stroke-width="4"/>
+  <path d="M602 216 L640 216" stroke="#1b7b71" stroke-width="4"/>
+  <path d="M630 206 L640 216 L630 226" fill="none" stroke="#1b7b71" stroke-width="4"/>
+</svg>

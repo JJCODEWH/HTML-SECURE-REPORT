@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML 安全发布首页</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #ece9e2;
+        --panel: #fdfdfb;
+        --panel-soft: #f1f4ef;
+        --line: #c9d2c8;
+        --line-strong: #aab8ab;
+        --text: #16231d;
+        --muted: #4f6258;
+        --primary: #0b5f59;
+        --sidebar-top: #203329;
+        --sidebar-btm: #15261f;
+        --sidebar-line: rgba(255, 255, 255, 0.12);
+        --sidebar-icon: #d8ebe0;
+        --shadow-sm: 0 1px 3px rgba(16, 28, 21, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(1200px 620px at 12% -18%, rgba(11, 95, 89, 0.16) 0%, transparent 60%),
+          radial-gradient(980px 540px at 100% -20%, rgba(133, 94, 41, 0.14) 0%, transparent 56%),
+          var(--bg);
+      }
+
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 78px minmax(0, 1fr);
+      }
+
+      .side-nav {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        border-right: 1px solid var(--sidebar-line);
+        background: linear-gradient(180deg, var(--sidebar-top), var(--sidebar-btm));
+        box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 0;
+      }
+
+      .nav-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--sidebar-icon);
+        background: rgba(255, 255, 255, 0.03);
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        text-decoration: none;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.24);
+      }
+
+      .nav-btn.active {
+        border-color: rgba(158, 215, 188, 0.72);
+        background: linear-gradient(180deg, rgba(31, 107, 89, 0.36), rgba(24, 74, 62, 0.24));
+      }
+
+      .content {
+        padding: 20px;
+      }
+
+      .hero {
+        margin-bottom: 14px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: linear-gradient(180deg, #ffffff, #f3f7f1);
+        box-shadow: var(--shadow-sm);
+        padding: 16px 18px;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: 30px;
+        line-height: 1.15;
+      }
+
+      .hero p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      .block {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+      }
+
+      .block-head {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        background: linear-gradient(180deg, #fdfefc, #edf3ec);
+      }
+
+      .block-head h2 {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .steps {
+        display: grid;
+        gap: 12px;
+        padding: 12px;
+      }
+
+      .step {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 12px;
+      }
+
+      .step h3 {
+        margin: 0 0 8px;
+        font-size: 16px;
+      }
+
+      .step p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        line-height: 1.6;
+        font-size: 14px;
+      }
+
+      .step img {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f7faf6;
+        display: block;
+      }
+
+      .links {
+        padding: 12px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .quick-link {
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: var(--text);
+        background: linear-gradient(180deg, #ffffff, #edf3ea);
+        font-weight: 700;
+      }
+
+      .tips {
+        margin: 0;
+        padding: 12px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 820px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        .side-nav {
+          position: static;
+          height: auto;
+          border-right: 0;
+          border-bottom: 1px solid var(--sidebar-line);
+          flex-direction: row;
+          justify-content: center;
+          padding: 10px 12px;
+        }
+
+        .content {
+          padding: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="side-nav" aria-label="主导航">
+        <a class="nav-btn active" href="./" aria-label="首页">⌂</a>
+        <a class="nav-btn" href="../?v=20260807-view-19" aria-label="查看">▦</a>
+        <a class="nav-btn" href="../admin/?v=20260807-13" aria-label="管理">⚙</a>
+      </aside>
+
+      <main class="content">
+        <header class="hero">
+          <h1>HTML 安全发布工具首页</h1>
+          <p>按下面 3 步就可以完成上传、加密、查看和清理，全流程都在网页里完成。</p>
+        </header>
+
+        <section class="layout">
+          <section class="block">
+            <div class="block-head">
+              <h2>使用教程（图文）</h2>
+            </div>
+            <div class="steps">
+              <article class="step">
+                <h3>第 1 步：在管理页上传 HTML 并触发加密</h3>
+                <img src="./assets/step-1.svg" alt="上传并触发加密流程示意图" />
+                <p>进入管理页，填好仓库信息和管理员 PAT，选择 HTML 文件后点击“上传并触发加密”。系统会自动写入 incoming 并启动流程。</p>
+              </article>
+
+              <article class="step">
+                <h3>第 2 步：在查看页选择文档并用 KEY 解锁</h3>
+                <img src="./assets/step-2.svg" alt="查看页输入 KEY 解锁示意图" />
+                <p>切到查看页，选择文档，输入对应 KEY 后点击“解锁访问”，右侧即可显示完整 HTML 内容。</p>
+              </article>
+
+              <article class="step">
+                <h3>第 3 步：在管理页删除无效文件并同步清理</h3>
+                <img src="./assets/step-3.svg" alt="删除文件并同步清理示意图" />
+                <p>在删除区按文档或 Doc ID 删除后，会同步清理 incoming、key-map、payload 和 manifest，避免历史残留。</p>
+              </article>
+            </div>
+          </section>
+
+          <aside class="block">
+            <div class="block-head">
+              <h2>快捷入口</h2>
+            </div>
+            <div class="links">
+              <a class="quick-link" href="../admin/?v=20260807-13">进入管理中心</a>
+              <a class="quick-link" href="../?v=20260807-view-19">进入查看中心</a>
+            </div>
+            <p class="tips">
+              建议流程：先上传加密，再查 KEY，最后在查看页验证；验证完成后可在管理页执行删除清理，保持仓库干净。
+            </p>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
