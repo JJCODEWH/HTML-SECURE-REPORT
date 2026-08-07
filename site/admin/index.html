@@ -7,235 +7,319 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #ece9e2;
-        --surface: #fdfdfb;
-        --surface-tint: #f1f4ef;
-        --line: #c9d2c8;
-        --line-strong: #aab8ab;
-        --text: #16231d;
-        --muted: #4f6258;
-        --primary: #0b5f59;
-        --primary-press: #084844;
-        --secondary: #e1e9e3;
-        --accent: #b45309;
-        --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.08);
-        --shadow-md: 0 12px 28px rgba(16, 24, 40, 0.14);
+        --bg: #f4f7fc;
+        --panel: #ffffff;
+        --panel-soft: #f8fbff;
+        --line: #d8e2f0;
+        --line-strong: #b8c7dc;
+        --text: #0f1c2f;
+        --muted: #54627a;
+        --primary: #1d4ed8;
+        --primary-press: #1e40af;
+        --sidebar-top: #1b2a44;
+        --sidebar-btm: #111d31;
+        --sidebar-line: rgba(255, 255, 255, 0.12);
+        --sidebar-icon: #d7e3ff;
+        --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.1);
       }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
         font-family: "Segoe UI", Arial, sans-serif;
-        background:
-          radial-gradient(1200px 440px at 0% -18%, rgba(16, 185, 129, 0.16) 0%, transparent 60%),
-          radial-gradient(930px 380px at 100% -18%, rgba(180, 83, 9, 0.14) 0%, transparent 58%),
-          radial-gradient(860px 380px at 50% -30%, rgba(148, 163, 184, 0.2) 0%, transparent 60%),
-          var(--bg);
         color: var(--text);
+        background:
+          radial-gradient(1200px 620px at 10% -18%, rgba(29, 78, 216, 0.16) 0%, transparent 60%),
+          radial-gradient(980px 540px at 100% -20%, rgba(14, 116, 144, 0.15) 0%, transparent 56%),
+          var(--bg);
       }
-      .wrap {
-        max-width: 1120px;
-        margin: 30px auto;
-        padding: 0 20px 28px;
+
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 78px minmax(0, 1fr);
       }
-      .header {
-        margin-bottom: 18px;
-        padding: 16px 18px;
+
+      .side-nav {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        border-right: 1px solid var(--sidebar-line);
+        background: linear-gradient(180deg, var(--sidebar-top), var(--sidebar-btm));
+        box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 18px 0 14px;
+      }
+
+      .nav-brand {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f7fbff;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 16px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+      }
+
+      .nav-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--sidebar-icon);
+        background: rgba(255, 255, 255, 0.03);
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        text-decoration: none;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.24);
+      }
+
+      .nav-btn.active {
+        border-color: rgba(125, 170, 255, 0.72);
+        background: linear-gradient(180deg, rgba(61, 124, 255, 0.34), rgba(32, 76, 177, 0.2));
+      }
+
+      .nav-spacer {
+        flex: 1;
+      }
+
+      .content {
+        padding: 20px;
+      }
+
+      .hero {
+        margin-bottom: 14px;
         border: 1px solid var(--line);
-        border-radius: 8px;
-        background: linear-gradient(135deg, #fdfdfb, #f1f5f1 65%, #e9efe8);
+        border-radius: 10px;
+        background: linear-gradient(180deg, #ffffff, #f5f9ff);
         box-shadow: var(--shadow-sm);
+        padding: 16px 18px;
       }
-      .header-top {
+
+      .hero-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: 10px;
       }
-      .header h1 {
+
+      .hero h1 {
         margin: 0;
         font-size: 30px;
-        line-height: 1.2;
-        letter-spacing: 0;
+        line-height: 1.15;
       }
-      .header p {
+
+      .hero p {
         margin: 8px 0 0;
         color: var(--muted);
         font-size: 14px;
       }
-      .layout {
-        display: grid;
-        grid-template-columns: 1.25fr 1fr;
-        gap: 14px;
-      }
-      .block {
-        background: linear-gradient(180deg, var(--surface), var(--surface-tint));
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        padding: 14px;
-        box-shadow: 0 8px 20px rgba(16, 24, 40, 0.08);
-      }
-      .row {
-        display: grid;
-        gap: 10px;
-      }
-      .row + .row {
-        margin-top: 10px;
-      }
-      .cols-3 {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-      .cols-2 {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-      .cols-mix {
-        grid-template-columns: minmax(0, 1fr) 180px 180px;
-      }
-      .cols-key {
-        grid-template-columns: 190px minmax(0, 1fr);
-      }
-      .cols-del {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 220px;
-      }
-      .align-end {
-        align-items: end;
-      }
-      .section-title {
-        font-size: 14px;
-        font-weight: 800;
-        margin: 0 0 10px;
-        color: #2f4a3f;
-      }
-      .label {
-        font-size: 12px;
-        color: var(--muted);
-        margin: 0 0 6px;
-      }
-      input[type="text"],
-      input[type="password"],
-      input[type="file"],
-      select {
-        width: 100%;
-        box-sizing: border-box;
-        min-height: 40px;
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        background: #fdfefc;
-        color: var(--text);
-        padding: 8px 12px;
-        font-size: 14px;
-        transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
-      }
-      select.select-placeholder {
-        color: var(--muted);
-      }
-      select option {
-        color: var(--text);
-      }
-      select option[value=""] {
-        color: var(--muted);
-      }
-      input:hover,
-      select:hover {
-        border-color: var(--line-strong);
-      }
-      input:focus,
-      select:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(11, 95, 89, 0.2);
-      }
-      button {
-        min-height: 40px;
-        border-radius: 6px;
-        border: 1px solid var(--line);
-        background: var(--secondary);
-        color: var(--text);
-        padding: 8px 14px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 80ms ease, box-shadow 120ms ease, filter 120ms ease, border-color 120ms ease;
-        box-shadow: var(--shadow-sm);
-      }
-      button:hover {
-        border-color: var(--line-strong);
-        filter: brightness(0.99);
-      }
-      button:active {
-        transform: translateY(1px);
-      }
-      button:focus-visible {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(11, 95, 89, 0.2);
-      }
-      .cols-mix > button,
-      .cols-key > button,
-      .cols-2 > button {
-        width: 100%;
-      }
-      .btn-primary {
-        background: linear-gradient(180deg, #139188, var(--primary));
-        border-color: var(--primary);
-        color: #ffffff;
-        box-shadow: 0 8px 18px rgba(11, 95, 89, 0.28);
-      }
-      .btn-primary:active {
-        background: var(--primary-press);
-        border-color: var(--primary-press);
-      }
+
       .btn-link {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         min-height: 36px;
-        border-radius: 6px;
-        border: 1px solid #b8c9ba;
-        background: linear-gradient(180deg, #fdfefc, #eaf1eb);
+        border-radius: 7px;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, #ffffff, #edf3ff);
         color: var(--text);
         padding: 0 12px;
         font-size: 13px;
         font-weight: 600;
         text-decoration: none;
       }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 14px;
+      }
+
+      .block {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px;
+        background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+        box-shadow: var(--shadow-sm);
+      }
+
+      .row {
+        display: grid;
+        gap: 10px;
+      }
+
+      .row + .row {
+        margin-top: 10px;
+      }
+
+      .cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .cols-mix {
+        grid-template-columns: minmax(0, 1fr) 180px 180px;
+      }
+
+      .cols-key {
+        grid-template-columns: 190px minmax(0, 1fr);
+      }
+
+      .cols-del {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 220px;
+      }
+
+      .align-end {
+        align-items: end;
+      }
+
+      .section-title {
+        font-size: 14px;
+        font-weight: 800;
+        margin: 0 0 10px;
+        color: #314c7a;
+      }
+
+      .label {
+        font-size: 12px;
+        color: var(--muted);
+        margin: 0 0 6px;
+      }
+
+      input[type="text"],
+      input[type="password"],
+      input[type="file"],
+      select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: #ffffff;
+        color: var(--text);
+        padding: 8px 12px;
+        font-size: 14px;
+        transition: border-color 120ms ease, box-shadow 120ms ease;
+      }
+
+      select.select-placeholder {
+        color: var(--muted);
+      }
+
+      input:hover,
+      select:hover {
+        border-color: var(--line-strong);
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
+      }
+
+      button {
+        min-height: 40px;
+        border-radius: 7px;
+        border: 1px solid var(--line);
+        background: #edf3ff;
+        color: var(--text);
+        padding: 8px 14px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .btn-primary {
+        background: linear-gradient(180deg, #2f6cff, var(--primary));
+        border-color: var(--primary);
+        color: #ffffff;
+      }
+
       .repo {
         margin: 0;
         font-size: 13px;
         color: var(--muted);
       }
+
       code {
-        background: #e8f0e9;
-        border: 1px solid #b8cab9;
-        border-radius: 4px;
+        background: #edf3ff;
+        border: 1px solid #bfd0ea;
+        border-radius: 5px;
         padding: 1px 5px;
-        color: #254238;
+        color: #223e69;
       }
+
       #status {
         min-height: 88px;
-        border: 1px solid #c2cec4;
-        border-radius: 6px;
-        background: linear-gradient(180deg, #f8fbf7, #edf2ed);
+        border: 1px solid #c9d7ee;
+        border-radius: 7px;
+        background: linear-gradient(180deg, #fbfdff, #f0f5ff);
         padding: 10px 12px;
         white-space: pre-wrap;
         font-size: 14px;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
       }
+
       .hint {
         margin: 0;
         font-size: 13px;
         color: var(--muted);
-        border-left: 3px solid rgba(180, 83, 9, 0.5);
+        border-left: 3px solid rgba(29, 78, 216, 0.46);
         padding-left: 9px;
       }
+
       .full {
         grid-column: 1 / -1;
       }
+
       .status-block {
         grid-column: 1 / -1;
       }
-      @media (max-width: 960px) {
+
+      @media (max-width: 1000px) {
         .layout {
           grid-template-columns: 1fr;
         }
       }
+
+      @media (max-width: 820px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        .side-nav {
+          position: static;
+          height: auto;
+          border-right: 0;
+          border-bottom: 1px solid var(--sidebar-line);
+          flex-direction: row;
+          justify-content: center;
+          padding: 10px 12px;
+        }
+
+        .nav-spacer {
+          display: none;
+        }
+
+        .content {
+          padding: 14px;
+        }
+      }
+
       @media (max-width: 760px) {
         .cols-3,
         .cols-2,
@@ -244,7 +328,8 @@
         .cols-del {
           grid-template-columns: 1fr;
         }
-        .header-top {
+
+        .hero-top {
           flex-direction: column;
           align-items: flex-start;
         }
@@ -252,97 +337,109 @@
     </style>
   </head>
   <body>
-    <main class="wrap">
-      <header class="header">
-        <div class="header-top">
-          <h1>HTML 安全管理中心</h1>
-          <a class="btn-link" href="../?v=20260805-view6">返回查看界面</a>
-        </div>
-        <p>统一处理 HTML 上传、密钥查询、流程状态检查。</p>
-      </header>
+    <div class="app">
+      <aside class="side-nav" aria-label="主导航">
+        <div class="nav-brand">H</div>
+        <a class="nav-btn" href="../" aria-label="查看">▦</a>
+        <a class="nav-btn active" href="./" aria-label="管理">⚙</a>
+        <a class="nav-btn" href="../" aria-label="预览">⧉</a>
+        <div class="nav-spacer"></div>
+        <a class="nav-btn" href="../" aria-label="返回">↩</a>
+      </aside>
 
-      <section class="layout" id="adminPanel">
-        <section class="block">
-          <p class="section-title">仓库连接</p>
-          <p class="repo">目标仓库：<code id="repoLabel">JJCODEWH/HTML-SECURE-REPORT-ADMIN@main</code></p>
-          <div class="row cols-3">
-            <div>
-              <p class="label">Owner</p>
-              <input id="owner" type="text" value="JJCODEWH" placeholder="组织/用户" />
-            </div>
-            <div>
-              <p class="label">Repository</p>
-              <input id="repo" type="text" value="HTML-SECURE-REPORT-ADMIN" placeholder="私有仓库名" />
-            </div>
-            <div>
-              <p class="label">Branch</p>
-              <input id="branch" type="text" value="main" placeholder="分支名" />
-            </div>
+      <main class="content">
+        <header class="hero">
+          <div class="hero-top">
+            <h1>HTML 安全管理中心</h1>
+            <a class="btn-link" href="../?v=20260806-view-16">返回查看界面</a>
           </div>
-          <div class="row cols-2 align-end">
-            <input id="token" type="password" autocomplete="off" placeholder="管理员 PAT（repo 权限）" />
-            <button id="loadFilesBtn" type="button">加载 incoming</button>
-          </div>
-        </section>
+          <p>统一处理 HTML 上传、密钥查询、流程状态检查。</p>
+        </header>
 
-        <section class="block">
-          <p class="section-title">文档与密钥</p>
-          <div class="row cols-2 align-end">
-            <div>
-              <p class="label">选择已有文档</p>
-              <select id="incomingSelect" aria-label="existing incoming files">
-                <option value="">incoming/ 现有文件（可选）</option>
-              </select>
+        <section class="layout" id="adminPanel">
+          <section class="block">
+            <p class="section-title">仓库连接</p>
+            <p class="repo">目标仓库：<code id="repoLabel">JJCODEWH/HTML-SECURE-REPORT-ADMIN@main</code></p>
+            <div class="row cols-3">
+              <div>
+                <p class="label">Owner</p>
+                <input id="owner" type="text" value="JJCODEWH" placeholder="组织/用户" />
+              </div>
+              <div>
+                <p class="label">Repository</p>
+                <input id="repo" type="text" value="HTML-SECURE-REPORT-ADMIN" placeholder="私有仓库名" />
+              </div>
+              <div>
+                <p class="label">Branch</p>
+                <input id="branch" type="text" value="main" placeholder="分支名" />
+              </div>
             </div>
-            <div>
-              <p class="label">Doc ID</p>
-              <input id="docId" type="text" placeholder="默认取文件名" />
+            <div class="row cols-2 align-end">
+              <input id="token" type="password" autocomplete="off" placeholder="管理员 PAT（repo 权限）" />
+              <button id="loadFilesBtn" type="button">加载 incoming</button>
             </div>
-          </div>
-          <div class="row cols-key">
-            <button id="viewKeyBtn" type="button">按 Doc ID 查 KEY</button>
-            <input id="keyOutput" type="text" readonly placeholder="这里显示 KEY" />
-          </div>
-        </section>
+          </section>
 
-        <section class="block full">
-          <p class="section-title">上传与加密</p>
-          <div class="row cols-mix">
-            <input id="htmlFile" type="file" accept=".html,text/html" />
-            <button id="uploadBtn" class="btn-primary" type="button">上传并触发加密</button>
-            <button id="checkRunsBtn" type="button">查看流程状态</button>
-          </div>
-          <p class="hint">
-            上传路径：<code>incoming/&lt;doc-id&gt;.html</code>。提交后会触发私有仓库自动加密，并同步公开 payload。
-          </p>
-        </section>
-
-        <section class="block full">
-          <p class="section-title">删除文件</p>
-          <div class="row cols-del align-end">
-            <div>
-              <p class="label">文档列表</p>
-              <select id="deleteSelect" aria-label="delete incoming files">
-                <option value="">选择要删除的文档</option>
-              </select>
+          <section class="block">
+            <p class="section-title">文档与密钥</p>
+            <div class="row cols-2 align-end">
+              <div>
+                <p class="label">选择已有文档</p>
+                <select id="incomingSelect" aria-label="existing incoming files">
+                  <option value="">incoming/ 现有文件（可选）</option>
+                </select>
+              </div>
+              <div>
+                <p class="label">Doc ID</p>
+                <input id="docId" type="text" placeholder="默认取文件名" />
+              </div>
             </div>
-            <div>
-              <p class="label">Doc ID</p>
-              <input id="deleteDocId" type="text" placeholder="输入要删除的 Doc ID（例如 report-001）" />
+            <div class="row cols-key">
+              <button id="viewKeyBtn" type="button">按 Doc ID 查 KEY</button>
+              <input id="keyOutput" type="text" readonly placeholder="这里显示 KEY" />
             </div>
-            <button id="deleteBtn" type="button">删除 incoming 文件</button>
-          </div>
-          <p class="hint">
-            删除会同时清理私有仓库（incoming / key-map / keys）与公开仓库（payload 与 manifest）对应内容。
-          </p>
-        </section>
+          </section>
 
-        <section class="block status-block">
-          <p class="section-title">状态信息</p>
-          <div id="status"></div>
+          <section class="block full">
+            <p class="section-title">上传与加密</p>
+            <div class="row cols-mix">
+              <input id="htmlFile" type="file" accept=".html,text/html" />
+              <button id="uploadBtn" class="btn-primary" type="button">上传并触发加密</button>
+              <button id="checkRunsBtn" type="button">查看流程状态</button>
+            </div>
+            <p class="hint">
+              上传路径：<code>incoming/&lt;doc-id&gt;.html</code>。提交后会触发私有仓库自动加密，并同步公开 payload。
+            </p>
+          </section>
+
+          <section class="block full">
+            <p class="section-title">删除文件</p>
+            <div class="row cols-del align-end">
+              <div>
+                <p class="label">文档列表</p>
+                <select id="deleteSelect" aria-label="delete incoming files">
+                  <option value="">选择要删除的文档</option>
+                </select>
+              </div>
+              <div>
+                <p class="label">Doc ID</p>
+                <input id="deleteDocId" type="text" placeholder="输入要删除的 Doc ID（例如 report-001）" />
+              </div>
+              <button id="deleteBtn" type="button">删除 incoming 文件</button>
+            </div>
+            <p class="hint">
+              删除会同步清理私有仓库（incoming / key-map / keys）与公开仓库（payload 与 manifest）对应内容。
+            </p>
+          </section>
+
+          <section class="block status-block">
+            <p class="section-title">状态信息</p>
+            <div id="status"></div>
+          </section>
         </section>
-      </section>
-    </main>
+      </main>
+    </div>
+
     <script nomodule>
       (function () {
         var html = '' +

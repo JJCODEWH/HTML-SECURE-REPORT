@@ -7,20 +7,22 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #ece9e2;
-        --surface: #fdfdfb;
-        --surface-soft: #f1f4ef;
-        --line: #c9d2c8;
-        --line-strong: #aab8ab;
-        --text: #16231d;
-        --muted: #4f6258;
-        --primary: #0b5f59;
-        --primary-press: #084844;
-        --accent: #b45309;
-        --secondary: #e1e9e3;
-        --ok: #0b5f59;
-        --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.08);
-        --shadow-md: 0 14px 30px rgba(16, 24, 40, 0.14);
+        --bg: #f4f7fc;
+        --panel: #ffffff;
+        --panel-soft: #f8fbff;
+        --line: #d8e2f0;
+        --line-strong: #b8c7dc;
+        --text: #0f1c2f;
+        --muted: #54627a;
+        --primary: #1d4ed8;
+        --primary-press: #1e40af;
+        --ok: #0f766e;
+        --sidebar-top: #1b2a44;
+        --sidebar-btm: #111d31;
+        --sidebar-line: rgba(255, 255, 255, 0.12);
+        --sidebar-icon: #d7e3ff;
+        --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.1);
+        --shadow-md: 0 18px 34px rgba(15, 23, 42, 0.16);
       }
 
       * {
@@ -30,36 +32,90 @@
       body {
         margin: 0;
         font-family: "Segoe UI", Arial, sans-serif;
-        background:
-          radial-gradient(1200px 440px at 0% -25%, rgba(16, 185, 129, 0.16) 0%, transparent 60%),
-          radial-gradient(920px 420px at 100% -20%, rgba(180, 83, 9, 0.14) 0%, transparent 58%),
-          radial-gradient(980px 420px at 50% -30%, rgba(148, 163, 184, 0.2) 0%, transparent 62%),
-          var(--bg);
         color: var(--text);
+        background:
+          radial-gradient(1200px 620px at 12% -18%, rgba(29, 78, 216, 0.16) 0%, transparent 60%),
+          radial-gradient(980px 540px at 100% -20%, rgba(14, 116, 144, 0.15) 0%, transparent 56%),
+          var(--bg);
       }
 
-      .wrap {
-        max-width: 1240px;
-        margin: 24px auto;
-        padding: 0 18px 26px;
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 78px minmax(0, 1fr);
       }
 
-      .header {
+      .side-nav {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        border-right: 1px solid var(--sidebar-line);
+        background: linear-gradient(180deg, var(--sidebar-top), var(--sidebar-btm));
+        box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 18px 0 14px;
+      }
+
+      .nav-brand {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #f7fbff;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 16px;
+        letter-spacing: 0;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+      }
+
+      .nav-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--sidebar-icon);
+        background: rgba(255, 255, 255, 0.03);
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        text-decoration: none;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.24);
+      }
+
+      .nav-btn.active {
+        border-color: rgba(125, 170, 255, 0.72);
+        background: linear-gradient(180deg, rgba(61, 124, 255, 0.34), rgba(32, 76, 177, 0.2));
+      }
+
+      .nav-spacer {
+        flex: 1;
+      }
+
+      .content {
+        padding: 20px;
+      }
+
+      .hero {
         margin-bottom: 14px;
-        padding: 16px 18px;
         border: 1px solid var(--line);
-        border-radius: 8px;
-        background: linear-gradient(125deg, #fdfdfb, #f1f5f1 62%, #e9efe8);
+        border-radius: 10px;
+        background: linear-gradient(180deg, #ffffff, #f5f9ff);
         box-shadow: var(--shadow-sm);
+        padding: 16px 18px;
       }
 
-      .header h1 {
+      .hero h1 {
         margin: 0;
         font-size: 30px;
-        line-height: 1.18;
+        line-height: 1.15;
       }
 
-      .header p {
+      .hero p {
         margin: 8px 0 0;
         color: var(--muted);
         font-size: 14px;
@@ -67,16 +123,15 @@
 
       .layout {
         display: grid;
-        grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1.95fr) minmax(0, 1fr);
         gap: 14px;
-        align-items: start;
       }
 
       .block {
-        background: linear-gradient(180deg, var(--surface), var(--surface-soft));
         border: 1px solid var(--line);
-        border-radius: 8px;
-        box-shadow: 0 8px 20px rgba(16, 24, 40, 0.08);
+        border-radius: 10px;
+        background: linear-gradient(180deg, var(--panel), var(--panel-soft));
+        box-shadow: var(--shadow-sm);
       }
 
       .viewer-panel {
@@ -90,7 +145,7 @@
         gap: 12px;
         padding: 12px 14px;
         border-bottom: 1px solid var(--line);
-        background: linear-gradient(180deg, #fcfdfc, #eef4ee);
+        background: linear-gradient(180deg, #fbfdff, #eef4ff);
       }
 
       .title {
@@ -110,11 +165,11 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        min-height: 28px;
-        border: 1px solid #b7c8b9;
-        border-radius: 6px;
-        background: #e8f0e9;
-        color: #274136;
+        min-height: 29px;
+        border: 1px solid #bcd0f1;
+        border-radius: 7px;
+        background: #eaf1ff;
+        color: #223a68;
         padding: 0 10px;
         font-size: 12px;
       }
@@ -126,16 +181,16 @@
       }
 
       code {
-        border: 1px solid #b8cab9;
-        border-radius: 4px;
-        background: #e8f0e9;
+        border: 1px solid #bfd0ea;
+        border-radius: 5px;
+        background: #edf3ff;
         padding: 2px 7px;
-        color: #254238;
+        color: #223e69;
       }
 
       .viewer-shell {
         min-height: 74vh;
-        background: #fdfefc;
+        background: #ffffff;
       }
 
       .viewer-empty {
@@ -143,16 +198,16 @@
         display: grid;
         place-items: center;
         text-align: center;
-        padding: 22px;
+        padding: 24px;
         color: var(--muted);
       }
 
       .viewer-empty-card {
         width: min(460px, 100%);
-        border: 1px solid #c2cec4;
-        border-radius: 8px;
+        border: 1px solid #cbd8ec;
+        border-radius: 10px;
         background:
-          linear-gradient(180deg, #fbfcfa, #edf2ed),
+          linear-gradient(180deg, #fbfdff, #eef4ff),
           repeating-linear-gradient(
             0deg,
             transparent 0,
@@ -210,8 +265,8 @@
         width: 100%;
         min-height: 42px;
         border: 1px solid var(--line);
-        border-radius: 6px;
-        background: #fdfefc;
+        border-radius: 7px;
+        background: #ffffff;
         color: var(--text);
         padding: 8px 12px;
         font-size: 14px;
@@ -231,14 +286,14 @@
       select:focus {
         outline: none;
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(11, 95, 89, 0.2);
+        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
       }
 
       button {
         min-height: 42px;
-        border-radius: 6px;
+        border-radius: 7px;
         border: 1px solid var(--line);
-        background: var(--secondary);
+        background: #edf3ff;
         color: var(--text);
         padding: 8px 14px;
         font-size: 14px;
@@ -249,9 +304,9 @@
 
       .btn-primary {
         border-color: var(--primary);
-        background: linear-gradient(180deg, #139188, var(--primary));
+        background: linear-gradient(180deg, #2f6cff, var(--primary));
         color: #ffffff;
-        box-shadow: 0 8px 18px rgba(11, 95, 89, 0.28);
+        box-shadow: 0 8px 18px rgba(29, 78, 216, 0.28);
       }
 
       .btn-primary:active {
@@ -267,8 +322,7 @@
         padding: 0 10px;
         font-size: 12px;
         border: 1px solid var(--line);
-        border-color: #b8c9ba;
-        background: linear-gradient(180deg, #fdfefc, #eaf1eb);
+        background: linear-gradient(180deg, #ffffff, #edf3ff);
         color: var(--text);
         text-decoration: none;
       }
@@ -280,18 +334,18 @@
         width: 100%;
         min-height: 42px;
         padding: 0 10px;
-        border-radius: 6px;
-        border: 1px solid #b9cabb;
-        background: linear-gradient(180deg, #f9fcf8, #eaf1eb);
-        color: #2f4b3f;
+        border-radius: 7px;
+        border: 1px solid #c3d3eb;
+        background: linear-gradient(180deg, #fbfdff, #edf3ff);
+        color: #264472;
         font-size: 13px;
       }
 
       #status {
         min-height: 132px;
-        border: 1px solid #c2cec4;
-        border-radius: 6px;
-        background: linear-gradient(180deg, #f8fbf7, #edf2ed);
+        border: 1px solid #c9d7ee;
+        border-radius: 7px;
+        background: linear-gradient(180deg, #fbfdff, #f0f5ff);
         padding: 10px 12px;
         white-space: pre-wrap;
         font-size: 14px;
@@ -301,7 +355,7 @@
         margin: 0 0 8px;
         font-size: 13px;
         font-weight: 700;
-        color: #2f4a3f;
+        color: #314c7a;
       }
 
       .admin-toggle-row {
@@ -344,9 +398,33 @@
         min-height: calc(100vh - 56px);
       }
 
-      @media (max-width: 1000px) {
+      @media (max-width: 1080px) {
         .layout {
           grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 820px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        .side-nav {
+          position: static;
+          height: auto;
+          border-right: 0;
+          border-bottom: 1px solid var(--sidebar-line);
+          flex-direction: row;
+          justify-content: center;
+          padding: 10px 12px;
+        }
+
+        .nav-spacer {
+          display: none;
+        }
+
+        .content {
+          padding: 14px;
         }
       }
 
@@ -359,74 +437,86 @@
     </style>
   </head>
   <body>
-    <main class="wrap">
-      <header class="header">
-        <h1>HTML 安全查看中心</h1>
-        <p>打开页面默认进入文档工作区，选择 Doc ID 并输入 KEY 即可解锁查看。</p>
-      </header>
+    <div class="app">
+      <aside class="side-nav" aria-label="主导航">
+        <div class="nav-brand">H</div>
+        <a class="nav-btn active" href="./" aria-label="查看">▦</a>
+        <a class="nav-btn" href="./admin/" aria-label="管理">⚙</a>
+        <a class="nav-btn" href="./admin/" aria-label="上传">⇧</a>
+        <div class="nav-spacer"></div>
+        <a class="nav-btn" href="./admin/" aria-label="更多">⋯</a>
+      </aside>
 
-      <section class="layout">
-        <section class="block viewer-panel" id="viewerPanel">
-          <div class="viewer-toolbar">
-            <p class="title">文档查看区</p>
-            <div class="toolbar-actions">
-              <div class="meta">
-                <span class="chip">Doc ID: <code id="docId">default</code></span>
-                <span class="chip">访问方式: KEY</span>
+      <main class="content">
+        <header class="hero">
+          <h1>HTML 安全查看中心</h1>
+          <p>打开页面默认进入文档工作区，选择 Doc ID 并输入 KEY 即可解锁查看。</p>
+        </header>
+
+        <section class="layout">
+          <section class="block viewer-panel" id="viewerPanel">
+            <div class="viewer-toolbar">
+              <p class="title">文档查看区</p>
+              <div class="toolbar-actions">
+                <div class="meta">
+                  <span class="chip">Doc ID: <code id="docId">-</code></span>
+                  <span class="chip">访问方式: KEY</span>
+                </div>
+                <button id="fullscreenBtn" class="btn-ghost" type="button">全屏展开</button>
               </div>
-              <button id="fullscreenBtn" class="btn-ghost" type="button">全屏展开</button>
             </div>
-          </div>
-          <div class="viewer-shell">
-            <div id="viewerEmpty" class="viewer-empty">
-              <div class="viewer-empty-card">
-                <strong>文档已加密</strong>
-                请在右侧输入对应 KEY 进行访问。
+            <div class="viewer-shell">
+              <div id="viewerEmpty" class="viewer-empty">
+                <div class="viewer-empty-card">
+                  <strong>文档已加密</strong>
+                  请在右侧输入对应 KEY 进行访问。
+                </div>
+              </div>
+              <iframe id="viewer" sandbox="allow-same-origin allow-scripts"></iframe>
+            </div>
+          </section>
+
+          <section class="block" id="unlockPanel">
+            <div class="control">
+              <p class="title">KEY 访问</p>
+            </div>
+
+            <div class="control">
+              <div class="grid-2">
+                <div>
+                  <p class="label">选择文档</p>
+                  <select id="docSelect" aria-label="选择文档"></select>
+                </div>
+                <div>
+                  <p class="label">文档状态</p>
+                  <div id="docState">待解锁</div>
+                </div>
               </div>
             </div>
-            <iframe id="viewer" sandbox="allow-same-origin allow-scripts"></iframe>
-          </div>
+
+            <div class="control">
+              <div class="key-row">
+                <input id="keyInput" type="password" placeholder="请输入访问 KEY" />
+                <button id="unlockBtn" class="btn-primary" type="button">解锁访问</button>
+              </div>
+            </div>
+
+            <div class="control">
+              <p class="status-title">状态信息</p>
+              <div id="status"></div>
+            </div>
+
+            <div class="control">
+              <div class="admin-toggle-row">
+                <p class="status-title">管理员操作</p>
+                <a id="adminJumpBtn" class="btn-ghost" href="./admin/">进入管理界面</a>
+              </div>
+            </div>
+          </section>
         </section>
+      </main>
+    </div>
 
-        <section class="block" id="unlockPanel">
-          <div class="control">
-            <p class="title">KEY 访问</p>
-          </div>
-
-          <div class="control">
-            <div class="grid-2">
-              <div>
-                <p class="label">选择文档</p>
-                <select id="docSelect" aria-label="选择文档"></select>
-              </div>
-              <div>
-                <p class="label">文档状态</p>
-                <div id="docState">待解锁</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="control">
-            <div class="key-row">
-              <input id="keyInput" type="password" placeholder="请输入访问 KEY" />
-              <button id="unlockBtn" class="btn-primary" type="button">解锁访问</button>
-            </div>
-          </div>
-
-          <div class="control">
-            <p class="status-title">状态信息</p>
-            <div id="status"></div>
-          </div>
-
-          <div class="control">
-            <div class="admin-toggle-row">
-              <p class="status-title">管理员操作</p>
-              <a id="adminJumpBtn" class="btn-ghost" href="./admin/">进入管理界面</a>
-            </div>
-          </div>
-        </section>
-      </section>
-    </main>
     <script nomodule>
       (function () {
         var html = '' +
