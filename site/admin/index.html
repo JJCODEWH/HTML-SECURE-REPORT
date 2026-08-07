@@ -7,20 +7,20 @@
     <style>
       :root {
         color-scheme: light;
-        --bg: #f4f7fc;
-        --panel: #ffffff;
-        --panel-soft: #f8fbff;
-        --line: #d8e2f0;
-        --line-strong: #b8c7dc;
-        --text: #0f1c2f;
-        --muted: #54627a;
-        --primary: #1d4ed8;
-        --primary-press: #1e40af;
-        --sidebar-top: #1b2a44;
-        --sidebar-btm: #111d31;
+        --bg: #ece9e2;
+        --panel: #fdfdfb;
+        --panel-soft: #f1f4ef;
+        --line: #c9d2c8;
+        --line-strong: #aab8ab;
+        --text: #16231d;
+        --muted: #4f6258;
+        --primary: #0b5f59;
+        --primary-press: #084844;
+        --sidebar-top: #203329;
+        --sidebar-btm: #15261f;
         --sidebar-line: rgba(255, 255, 255, 0.12);
-        --sidebar-icon: #d7e3ff;
-        --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.1);
+        --sidebar-icon: #d8ebe0;
+        --shadow-sm: 0 1px 3px rgba(16, 28, 21, 0.12);
       }
 
       * {
@@ -32,8 +32,8 @@
         font-family: "Segoe UI", Arial, sans-serif;
         color: var(--text);
         background:
-          radial-gradient(1200px 620px at 10% -18%, rgba(29, 78, 216, 0.16) 0%, transparent 60%),
-          radial-gradient(980px 540px at 100% -20%, rgba(14, 116, 144, 0.15) 0%, transparent 56%),
+          radial-gradient(1200px 620px at 10% -18%, rgba(11, 95, 89, 0.16) 0%, transparent 60%),
+          radial-gradient(980px 540px at 100% -20%, rgba(133, 94, 41, 0.14) 0%, transparent 56%),
           var(--bg);
       }
 
@@ -85,12 +85,17 @@
       }
 
       .nav-btn.active {
-        border-color: rgba(125, 170, 255, 0.72);
-        background: linear-gradient(180deg, rgba(61, 124, 255, 0.34), rgba(32, 76, 177, 0.2));
+        border-color: rgba(158, 215, 188, 0.72);
+        background: linear-gradient(180deg, rgba(31, 107, 89, 0.36), rgba(24, 74, 62, 0.24));
       }
 
       .nav-spacer {
         flex: 1;
+      }
+
+      .side-nav .nav-btn:nth-of-type(n + 3),
+      .side-nav .nav-spacer {
+        display: none;
       }
 
       .content {
@@ -101,7 +106,7 @@
         margin-bottom: 14px;
         border: 1px solid var(--line);
         border-radius: 10px;
-        background: linear-gradient(180deg, #ffffff, #f5f9ff);
+        background: linear-gradient(180deg, #ffffff, #f3f7f1);
         box-shadow: var(--shadow-sm);
         padding: 16px 18px;
       }
@@ -132,7 +137,7 @@
         min-height: 36px;
         border-radius: 7px;
         border: 1px solid var(--line);
-        background: linear-gradient(180deg, #ffffff, #edf3ff);
+        background: linear-gradient(180deg, #ffffff, #edf3ea);
         color: var(--text);
         padding: 0 12px;
         font-size: 13px;
@@ -191,7 +196,7 @@
         font-size: 14px;
         font-weight: 800;
         margin: 0 0 10px;
-        color: #314c7a;
+        color: #355547;
       }
 
       .label {
@@ -228,14 +233,14 @@
       select:focus {
         outline: none;
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
+        box-shadow: 0 0 0 3px rgba(11, 95, 89, 0.22);
       }
 
       button {
         min-height: 40px;
         border-radius: 7px;
         border: 1px solid var(--line);
-        background: #edf3ff;
+        background: #edf3ea;
         color: var(--text);
         padding: 8px 14px;
         font-size: 14px;
@@ -245,7 +250,7 @@
       }
 
       .btn-primary {
-        background: linear-gradient(180deg, #2f6cff, var(--primary));
+        background: linear-gradient(180deg, #1b7b71, var(--primary));
         border-color: var(--primary);
         color: #ffffff;
       }
@@ -257,18 +262,18 @@
       }
 
       code {
-        background: #edf3ff;
-        border: 1px solid #bfd0ea;
+        background: #edf3ea;
+        border: 1px solid #b7c9b7;
         border-radius: 5px;
         padding: 1px 5px;
-        color: #223e69;
+        color: #24483d;
       }
 
       #status {
         min-height: 88px;
-        border: 1px solid #c9d7ee;
+        border: 1px solid #c5d0c3;
         border-radius: 7px;
-        background: linear-gradient(180deg, #fbfdff, #f0f5ff);
+        background: linear-gradient(180deg, #fbfdf9, #eef4ea);
         padding: 10px 12px;
         white-space: pre-wrap;
         font-size: 14px;
@@ -278,7 +283,7 @@
         margin: 0;
         font-size: 13px;
         color: var(--muted);
-        border-left: 3px solid rgba(29, 78, 216, 0.46);
+        border-left: 3px solid rgba(11, 95, 89, 0.5);
         padding-left: 9px;
       }
 
@@ -351,7 +356,7 @@
         <header class="hero">
           <div class="hero-top">
             <h1>HTML 安全管理中心</h1>
-            <a class="btn-link" href="../?v=20260806-view-16">返回查看界面</a>
+            <a class="btn-link" href="../?v=20260807-view-17">返回查看界面</a>
           </div>
           <p>统一处理 HTML 上传、密钥查询、流程状态检查。</p>
         </header>
@@ -450,6 +455,6 @@
         document.body.innerHTML = html;
       })();
     </script>
-    <script src="./admin.js?v=20260806-10"></script>
+    <script src="./admin.js?v=20260807-11"></script>
   </body>
 </html>
