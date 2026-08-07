@@ -56,21 +56,7 @@
         flex-direction: column;
         align-items: center;
         gap: 10px;
-        padding: 18px 0 14px;
-      }
-
-      .nav-brand {
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: #f7fbff;
-        display: grid;
-        place-items: center;
-        font-weight: 700;
-        font-size: 16px;
-        letter-spacing: 0;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+        padding: 14px 0;
       }
 
       .nav-btn {
@@ -246,6 +232,17 @@
         border-top: 1px solid var(--line);
       }
 
+      #unlockPanel {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #unlockPanel .control:last-child {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
       .label {
         margin: 0 0 7px;
         font-size: 12px;
@@ -354,6 +351,7 @@
         padding: 10px 12px;
         white-space: pre-wrap;
         font-size: 14px;
+        flex: 1;
       }
 
       .status-title {
@@ -361,17 +359,6 @@
         font-size: 13px;
         font-weight: 700;
         color: #355547;
-      }
-
-      .admin-toggle-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .admin-toggle-row .status-title {
-        margin: 0;
       }
 
       .viewer-panel:fullscreen {
@@ -444,7 +431,6 @@
   <body>
     <div class="app">
       <aside class="side-nav" aria-label="主导航">
-        <div class="nav-brand">H</div>
         <a class="nav-btn active" href="./" aria-label="查看">▦</a>
         <a class="nav-btn" href="./admin/" aria-label="管理">⚙</a>
         <a class="nav-btn" href="./admin/" aria-label="上传">⇧</a>
@@ -511,12 +497,6 @@
               <div id="status"></div>
             </div>
 
-            <div class="control">
-              <div class="admin-toggle-row">
-                <p class="status-title">管理员操作</p>
-                <a id="adminJumpBtn" class="btn-ghost" href="./admin/">进入管理界面</a>
-              </div>
-            </div>
           </section>
         </section>
       </main>
@@ -532,6 +512,6 @@
         document.body.innerHTML = html;
       })();
     </script>
-    <script type="module" src="./decrypt.js?v=20260807-view-17"></script>
+    <script type="module" src="./decrypt.js?v=20260807-view-18"></script>
   </body>
 </html>
